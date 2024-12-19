@@ -7,6 +7,7 @@
     "href": "https://mintlify.com"
   },
   "layout": "sidenav",
+  "theme": "venus",
   "favicon": "/favicon.svg",
   "sidebar": {
     "items": "border"
