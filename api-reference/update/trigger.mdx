@@ -1,3 +1,15 @@
 ---
 openapi: "POST /project/update/{projectId}"
 ---
+
+## Webhook Support
+
+This endpoint supports webhook notifications for project updates. When a project is successfully updated, a webhook event will be triggered to notify subscribed endpoints.
+
+### Webhook Event
+
+- **Event Type**: `project.updated`
+- **Payload**: Contains the updated project data and metadata about the update
+- **Delivery**: Webhooks are delivered asynchronously after the update operation completes
+
+To configure webhook endpoints for this trigger, refer to the webhook configuration section in your project settings.

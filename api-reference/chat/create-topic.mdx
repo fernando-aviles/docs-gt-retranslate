@@ -1,3 +1,18 @@
 ---
 openapi: POST /chat/topic
 ---
+
+## Webhook Support
+
+This endpoint supports webhook notifications for real-time updates. When a topic is created, webhook events will be triggered to notify subscribed endpoints.
+
+### Webhook Events
+
+- `topic.created` - Triggered when a new topic is successfully created
+- `topic.failed` - Triggered when topic creation fails
+
+### Webhook Configuration
+
+To receive webhook notifications for this endpoint, configure your webhook URL in the dashboard or via the webhook configuration API. The webhook payload will include the topic details and relevant metadata.
+
+For more information on webhook setup and payload structure, see the [Webhook Documentation](/webhooks).

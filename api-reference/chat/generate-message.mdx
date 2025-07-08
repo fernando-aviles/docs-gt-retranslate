@@ -1,3 +1,30 @@
 ---
 openapi: POST /chat/message
 ---
+
+## Webhook Support
+
+This endpoint supports webhook notifications for real-time updates on message generation status and completion. Configure webhooks in your dashboard to receive notifications when:
+
+- Message generation starts
+- Message generation completes successfully
+- Message generation fails or encounters errors
+- Streaming updates are available (for streaming responses)
+
+### Webhook Configuration
+
+To enable webhooks for this endpoint:
+
+1. Navigate to your dashboard webhook settings
+2. Add your webhook URL endpoint
+3. Select the events you want to receive notifications for
+4. Configure authentication headers if required
+
+### Webhook Payload
+
+Webhook notifications will include:
+- Request ID for correlation
+- Event type (started, completed, failed, streaming_update)
+- Timestamp
+- Response data (for completion events)
+- Error details (for failure events)

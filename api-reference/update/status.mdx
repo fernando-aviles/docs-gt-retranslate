@@ -1,3 +1,22 @@
 ---
 openapi: "GET /project/update-status/{statusId}"
 ---
+
+## Webhook Support
+
+This endpoint supports webhook notifications for status updates. When a status is retrieved or modified, relevant webhook events will be triggered to notify subscribed endpoints.
+
+### Webhook Events
+
+- `status.retrieved` - Triggered when a status is successfully fetched
+- `status.updated` - Triggered when a status is modified (if applicable)
+
+### Webhook Configuration
+
+To receive webhook notifications for status updates:
+
+1. Configure your webhook endpoint in the project settings
+2. Subscribe to the relevant status events
+3. Ensure your endpoint can handle the webhook payload format
+
+For more information on webhook configuration and payload formats, see the [Webhooks Documentation](/webhooks).

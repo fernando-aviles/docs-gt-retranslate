@@ -116,6 +116,24 @@ When you need more control over your API documentation, create individual `MDX` 
 
 See [MDX Setup](/api-playground/mdx/configuration) for more information on creating individual pages for your API endpoints.
 
+## Webhook support
+
+The API playground also supports webhook documentation through OpenAPI specifications. Webhooks allow your API to send real-time notifications to external systems when specific events occur.
+
+<Info>
+Webhook support is available for OpenAPI 3.1+ specifications that include webhook definitions in the `webhooks` section.
+</Info>
+
+To add webhook documentation to your playground:
+
+1. Define webhooks in your OpenAPI specification using the `webhooks` object
+2. Include webhook event schemas and payload examples
+3. Document webhook authentication and security requirements
+4. Provide callback URL configuration instructions
+
+The playground will automatically generate interactive webhook documentation alongside your standard API endpoints, allowing developers to understand both your request-response APIs and webhook events in one place.
+
 ## Further reading
 
 - [AsyncAPI Setup](/api-playground/asyncapi/setup) for more information on creating your AsyncAPI schema to generate WebSocket reference pages.
+- [OpenAPI Webhooks](https://spec.openapis.org/oas/v3.1.0#webhook-object) for detailed webhook specification guidelines.
