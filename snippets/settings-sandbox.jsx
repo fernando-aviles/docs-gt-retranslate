@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Info, Code, Eye, Book, Palette, Navigation, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react'
 
-const DocsJsonSandbox = () => {
-  const [jsonInput, setJsonInput] = useState('');
-  const [validationResult, setValidationResult] = useState(null);
-  const [parsedConfig, setParsedConfig] = useState(null);
-  const [activeTab, setActiveTab] = useState('editor');
+export const DocsJsonSandbox = () => {
+  const [jsonInput, setJsonInput] = useState('')
+  const [validationResult, setValidationResult] = useState(null)
+  const [parsedConfig, setParsedConfig] = useState(null)
 
   // Default example configuration
   const defaultConfig = {
@@ -25,7 +23,7 @@ const DocsJsonSandbox = () => {
           ]
         },
         {
-          "group": "API Reference",
+          "group": "API Reference", 
           "pages": [
             "api/authentication",
             "api/users"
@@ -33,66 +31,70 @@ const DocsJsonSandbox = () => {
         }
       ]
     }
-  };
+  }
 
-  // Validation schema based on Mintlify docs
+  useEffect(() => {
+    setJsonInput(JSON.stringify(defaultConfig, null, 2))
+  }, [])
+
+  // Validation function
   const validateDocsJson = (config) => {
-    const errors = [];
-    const warnings = [];
+    const errors = []
+    const warnings = []
 
     // Required fields validation
     if (!config.theme) {
-      errors.push("'theme' is required. Must be one of: mint, maple, palm, willow, linden, almond, aspen");
+      errors.push("'theme' is required. Must be one of: mint, maple, palm, willow, linden, almond, aspen")
     } else {
-      const validThemes = ['mint', 'maple', 'palm', 'willow', 'linden', 'almond', 'aspen'];
+      const validThemes = ['mint', 'maple', 'palm', 'willow', 'linden', 'almond', 'aspen']
       if (!validThemes.includes(config.theme)) {
-        errors.push(`Invalid theme '${config.theme}'. Must be one of: ${validThemes.join(', ')}`);
+        errors.push(`Invalid theme '${config.theme}'. Must be one of: ${validThemes.join(', ')}`)
       }
     }
 
     if (!config.name) {
-      errors.push("'name' is required. This is the name of your project, organization, or product");
+      errors.push("'name' is required. This is the name of your project, organization, or product")
     }
 
     if (!config.colors || !config.colors.primary) {
-      errors.push("'colors.primary' is required. Must be a hex color code starting with #");
+      errors.push("'colors.primary' is required. Must be a hex color code starting with #")
     } else if (config.colors.primary && !config.colors.primary.match(/^#[0-9A-Fa-f]{6}$/)) {
-      errors.push("'colors.primary' must be a valid hex color code (e.g., #ff0000)");
+      errors.push("'colors.primary' must be a valid hex color code (e.g., #ff0000)")
     }
 
     if (!config.navigation) {
-      errors.push("'navigation' is required. Define your documentation structure");
+      errors.push("'navigation' is required. Define your documentation structure")
     } else {
       // Validate navigation structure
       if (config.navigation.groups) {
         config.navigation.groups.forEach((group, index) => {
           if (!group.group) {
-            errors.push(`Navigation group at index ${index} is missing 'group' property`);
+            errors.push(`Navigation group at index ${index} is missing 'group' property`)
           }
           if (!group.pages || !Array.isArray(group.pages)) {
-            errors.push(`Navigation group '${group.group}' is missing 'pages' array`);
+            errors.push(`Navigation group '${group.group}' is missing 'pages' array`)
           }
           
           // Check for reserved paths
           if (group.pages) {
             group.pages.forEach(page => {
               if (typeof page === 'string' && (page.includes('/api') || page.includes('/mcp'))) {
-                warnings.push(`Page '${page}' uses reserved path. /api and /mcp paths are reserved and may cause 404 errors`);
+                warnings.push(`Page '${page}' uses reserved path. /api and /mcp paths are reserved and may cause 404 errors`)
               }
-            });
+            })
           }
-        });
+        })
       }
 
       if (config.navigation.tabs) {
         config.navigation.tabs.forEach((tab, index) => {
           if (!tab.name) {
-            errors.push(`Navigation tab at index ${index} is missing 'name' property`);
+            errors.push(`Navigation tab at index ${index} is missing 'name' property`)
           }
           if (!tab.url) {
-            errors.push(`Navigation tab '${tab.name}' is missing 'url' property`);
+            errors.push(`Navigation tab '${tab.name}' is missing 'url' property`)
           }
-        });
+        })
       }
     }
 
@@ -100,245 +102,44 @@ const DocsJsonSandbox = () => {
     if (config.colors) {
       ['light', 'dark'].forEach(mode => {
         if (config.colors[mode] && !config.colors[mode].match(/^#[0-9A-Fa-f]{6}$/)) {
-          errors.push(`'colors.${mode}' must be a valid hex color code (e.g., #ff0000)`);
+          errors.push(`'colors.${mode}' must be a valid hex color code (e.g., #ff0000)`)
         }
-      });
-    }
-
-    if (config.favicon && typeof config.favicon !== 'string') {
-      if (config.favicon.light && typeof config.favicon.light !== 'string') {
-        warnings.push("'favicon.light' should be a string path to favicon file");
-      }
-      if (config.favicon.dark && typeof config.favicon.dark !== 'string') {
-        warnings.push("'favicon.dark' should be a string path to favicon file");
-      }
-    }
-
-    if (config.logo && typeof config.logo !== 'string') {
-      if (config.logo.light && typeof config.logo.light !== 'string') {
-        warnings.push("'logo.light' should be a string path to logo file");
-      }
-      if (config.logo.dark && typeof config.logo.dark !== 'string') {
-        warnings.push("'logo.dark' should be a string path to logo file");
-      }
+      })
     }
 
     // Best practices warnings
     if (!config.$schema) {
-      warnings.push("Consider adding '$schema': 'https://mintlify.com/docs.json' for better IDE support");
+      warnings.push("Consider adding '$schema': 'https://mintlify.com/docs.json' for better IDE support")
     }
 
     if (!config.description) {
-      warnings.push("Consider adding 'description' for better SEO and AI indexing");
+      warnings.push("Consider adding 'description' for better SEO and AI indexing")
     }
 
-    return { errors, warnings, isValid: errors.length === 0 };
-  };
-
-  useEffect(() => {
-    setJsonInput(JSON.stringify(defaultConfig, null, 2));
-  }, []);
+    return { errors, warnings, isValid: errors.length === 0 }
+  }
 
   useEffect(() => {
     if (!jsonInput.trim()) {
-      setValidationResult(null);
-      setParsedConfig(null);
-      return;
+      setValidationResult(null)
+      setParsedConfig(null)
+      return
     }
 
     try {
-      const parsed = JSON.parse(jsonInput);
-      setParsedConfig(parsed);
-      const validation = validateDocsJson(parsed);
-      setValidationResult(validation);
+      const parsed = JSON.parse(jsonInput)
+      setParsedConfig(parsed)
+      const validation = validateDocsJson(parsed)
+      setValidationResult(validation)
     } catch (error) {
       setValidationResult({
         errors: [`JSON Parse Error: ${error.message}`],
         warnings: [],
         isValid: false
-      });
-      setParsedConfig(null);
+      })
+      setParsedConfig(null)
     }
-  }, [jsonInput]);
-
-  const renderValidation = () => {
-    if (!validationResult) return null;
-
-    return (
-      <div className="space-y-4">
-        {validationResult.isValid && (
-          <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <span className="text-green-700 font-medium">Valid docs.json configuration!</span>
-          </div>
-        )}
-
-        {validationResult.errors.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-red-700 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              Errors ({validationResult.errors.length})
-            </h4>
-            <div className="space-y-1">
-              {validationResult.errors.map((error, index) => (
-                <div key={index} className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                  {error}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {validationResult.warnings.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-yellow-700 flex items-center gap-2">
-              <Info className="w-4 h-4" />
-              Warnings ({validationResult.warnings.length})
-            </h4>
-            <div className="space-y-1">
-              {validationResult.warnings.map((warning, index) => (
-                <div key={index} className="p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
-                  {warning}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderPreview = () => {
-    if (!parsedConfig || !validationResult?.isValid) {
-      return (
-        <div className="p-8 text-center text-gray-500">
-          <Book className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>Enter valid JSON to see preview</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-6">
-        {/* Site Header Preview */}
-        <div className="border rounded-lg overflow-hidden">
-          <div 
-            className="p-4 text-white" 
-            style={{ backgroundColor: parsedConfig.colors?.primary || '#0066cc' }}
-          >
-            <h2 className="text-xl font-bold">{parsedConfig.name}</h2>
-            {parsedConfig.description && (
-              <p className="text-sm opacity-90 mt-1">{parsedConfig.description}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Theme Preview */}
-        <div className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-2 flex items-center gap-2">
-            <Palette className="w-4 h-4" />
-            Theme Configuration
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div><strong>Theme:</strong> {parsedConfig.theme}</div>
-            <div><strong>Primary Color:</strong> 
-              <span 
-                className="inline-block w-4 h-4 ml-2 rounded border"
-                style={{ backgroundColor: parsedConfig.colors?.primary }}
-              ></span>
-              {parsedConfig.colors?.primary}
-            </div>
-            {parsedConfig.colors?.light && (
-              <div><strong>Light Mode Color:</strong> 
-                <span 
-                  className="inline-block w-4 h-4 ml-2 rounded border"
-                  style={{ backgroundColor: parsedConfig.colors.light }}
-                ></span>
-                {parsedConfig.colors.light}
-              </div>
-            )}
-            {parsedConfig.colors?.dark && (
-              <div><strong>Dark Mode Color:</strong> 
-                <span 
-                  className="inline-block w-4 h-4 ml-2 rounded border"
-                  style={{ backgroundColor: parsedConfig.colors.dark }}
-                ></span>
-                {parsedConfig.colors.dark}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Navigation Preview */}
-        {parsedConfig.navigation && (
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Navigation className="w-4 h-4" />
-              Navigation Structure
-            </h3>
-            
-            {/* Tabs Preview */}
-            {parsedConfig.navigation.tabs && (
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-600 mb-2">Tabs</h4>
-                <div className="flex gap-2 border-b">
-                  {parsedConfig.navigation.tabs.map((tab, index) => (
-                    <div key={index} className="px-3 py-2 border-b-2 border-blue-500 text-sm font-medium">
-                      {tab.name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Groups Preview */}
-            {parsedConfig.navigation.groups && (
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-600">Groups</h4>
-                {parsedConfig.navigation.groups.map((group, index) => (
-                  <div key={index} className="border-l-2 border-gray-200 pl-4">
-                    <h5 className="font-medium text-gray-800 mb-2">{group.group}</h5>
-                    {group.pages && (
-                      <ul className="space-y-1 text-sm text-gray-600">
-                        {group.pages.map((page, pageIndex) => (
-                          <li key={pageIndex} className="flex items-center gap-2">
-                            <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                            {typeof page === 'string' ? page : page.toString()}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Additional Config Preview */}
-        <div className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-2 flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Additional Configuration
-          </h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <strong>Schema:</strong> {parsedConfig.$schema ? '✓ Configured' : '✗ Not set'}
-            </div>
-            <div>
-              <strong>Favicon:</strong> {parsedConfig.favicon ? '✓ Configured' : '✗ Not set'}
-            </div>
-            <div>
-              <strong>Logo:</strong> {parsedConfig.logo ? '✓ Configured' : '✗ Not set'}
-            </div>
-            <div>
-              <strong>Description:</strong> {parsedConfig.description ? '✓ Configured' : '✗ Not set'}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  }, [jsonInput])
 
   const loadExample = (example) => {
     const examples = {
@@ -430,108 +231,221 @@ const DocsJsonSandbox = () => {
           ]
         }
       }
-    };
+    }
     
-    setJsonInput(JSON.stringify(examples[example], null, 2));
-  };
+    setJsonInput(JSON.stringify(examples[example], null, 2))
+  }
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log('Copied to clipboard!')
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err)
+      })
+  }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Mintlify docs.json Configuration Sandbox
-        </h1>
-        <p className="text-gray-600">
-          Test and validate your Mintlify documentation configuration. Edit the JSON on the left and see real-time validation and preview on the right.
-        </p>
-      </div>
-
-      {/* Example Buttons */}
-      <div className="mb-6 flex gap-2 flex-wrap">
-        <button
-          onClick={() => loadExample('minimal')}
-          className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-        >
-          Minimal Example
-        </button>
-        <button
-          onClick={() => loadExample('complete')}
-          className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200"
-        >
-          Complete Example
-        </button>
-        <button
-          onClick={() => loadExample('api')}
-          className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
-        >
-          API Documentation Example
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Editor Panel */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Code className="w-5 h-5" />
-            <h2 className="text-xl font-semibold">Configuration Editor</h2>
-          </div>
-          
-          <textarea
-            value={jsonInput}
-            onChange={(e) => setJsonInput(e.target.value)}
-            className="w-full h-96 p-4 border rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Enter your docs.json configuration here..."
-          />
-
-          {/* Validation Results */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Validation Results</h3>
-            {renderValidation()}
-          </div>
+    <div className="p-4 border dark:border-white/10 rounded-2xl not-prose">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-semibold text-zinc-950 dark:text-white mb-2">
+            Sandbox
+          </h1>
+          <p className="text-sm text-zinc-950/70 dark:text-white/70">
+            Test and validate your <code>docs.json</code> configuration. Edit the JSON and see real-time validation.
+          </p>
         </div>
 
-        {/* Preview Panel */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5" />
-              <h2 className="text-xl font-semibold">Live Preview</h2>
+        {/* Example Buttons */}
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => loadExample('minimal')}
+            className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-300"
+          >
+            Minimal Example
+          </button>
+          <button
+            onClick={() => loadExample('complete')}
+            className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-300"
+          >
+            Complete Example
+          </button>
+          <button
+            onClick={() => loadExample('api')}
+            className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors dark:bg-purple-900/30 dark:text-purple-300"
+          >
+            API Documentation Example
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Editor Panel */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium text-zinc-950 dark:text-white">Configuration Editor</h3>
+              <button
+                onClick={() => copyToClipboard(jsonInput)}
+                className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              >
+                Copy JSON
+              </button>
             </div>
+            
+            <textarea
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              className="w-full h-80 p-3 border dark:border-white/10 rounded-lg font-mono text-xs resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white"
+              placeholder="Enter your docs.json configuration here..."
+            />
           </div>
 
-          <div className="border rounded-lg bg-gray-50 min-h-96">
-            {renderPreview()}
+          {/* Preview Panel */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-zinc-950 dark:text-white">Live Preview</h3>
+            
+            {/* Validation Results */}
+            <div className="space-y-2">
+              {validationResult?.isValid && (
+                <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs">
+                  <span className="text-green-600 dark:text-green-400">✅</span>
+                  <span className="text-green-700 dark:text-green-300 font-medium">Valid docs.json configuration!</span>
+                </div>
+              )}
+
+              {validationResult?.errors?.length > 0 && (
+                <div className="space-y-1">
+                  <h4 className="text-xs font-medium text-red-700 dark:text-red-400">
+                    Errors ({validationResult.errors.length})
+                  </h4>
+                  {validationResult.errors.map((error, index) => (
+                    <div key={index} className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-700 dark:text-red-300">
+                      ⚠️ {error}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {validationResult?.warnings?.length > 0 && (
+                <div className="space-y-1">
+                  <h4 className="text-xs font-medium text-yellow-700 dark:text-yellow-400">
+                    Warnings ({validationResult.warnings.length})
+                  </h4>
+                  {validationResult.warnings.map((warning, index) => (
+                    <div key={index} className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-700 dark:text-yellow-300">
+                      ℹ️ {warning}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Configuration Preview */}
+            {parsedConfig && validationResult?.isValid && (
+              <div className="space-y-3">
+                {/* Site Header Preview */}
+                <div className="border dark:border-white/10 rounded-lg overflow-hidden">
+                  <div 
+                    className="p-3 text-white text-xs"
+                    style={{ backgroundColor: parsedConfig.colors?.primary || '#0066cc' }}
+                  >
+                    <div className="font-semibold">{parsedConfig.name}</div>
+                    {parsedConfig.description && (
+                      <div className="opacity-90 mt-1">{parsedConfig.description}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Theme Info */}
+                <div className="border dark:border-white/10 rounded-lg p-3">
+                  <h4 className="text-xs font-medium text-zinc-950 dark:text-white mb-2">Theme Configuration</h4>
+                  <div className="space-y-1 text-xs text-zinc-950/70 dark:text-white/70">
+                    <div><strong>Theme:</strong> {parsedConfig.theme}</div>
+                    <div className="flex items-center gap-2">
+                      <strong>Primary Color:</strong>
+                      <span 
+                        className="inline-block w-3 h-3 rounded border dark:border-white/20"
+                        style={{ backgroundColor: parsedConfig.colors?.primary }}
+                      ></span>
+                      <span className="font-mono">{parsedConfig.colors?.primary}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Preview */}
+                {parsedConfig.navigation && (
+                  <div className="border dark:border-white/10 rounded-lg p-3">
+                    <h4 className="text-xs font-medium text-zinc-950 dark:text-white mb-2">Navigation Structure</h4>
+                    
+                    {/* Tabs */}
+                    {parsedConfig.navigation.tabs && (
+                      <div className="mb-2">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Tabs:</div>
+                        <div className="flex gap-1">
+                          {parsedConfig.navigation.tabs.map((tab, index) => (
+                            <div key={index} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
+                              {tab.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Groups */}
+                    {parsedConfig.navigation.groups && (
+                      <div className="space-y-2">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70">Groups:</div>
+                        {parsedConfig.navigation.groups.map((group, index) => (
+                          <div key={index} className="border-l-2 border-zinc-200 dark:border-zinc-700 pl-2">
+                            <div className="text-xs font-medium text-zinc-950 dark:text-white">{group.group}</div>
+                            {group.pages && (
+                              <div className="mt-1 space-y-0.5">
+                                {group.pages.map((page, pageIndex) => (
+                                  <div key={pageIndex} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1">
+                                    <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
+                                    {typeof page === 'string' ? page : page.toString()}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Help Section */}
-      <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-        <h3 className="text-lg font-semibold mb-3 text-blue-900">Quick Reference</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <h4 className="font-medium text-blue-800 mb-2">Required Fields</h4>
-            <ul className="space-y-1 text-blue-700">
-              <li>• <code>theme</code> - mint, maple, palm, willow, linden, almond, aspen</li>
-              <li>• <code>name</code> - Your documentation site name</li>
-              <li>• <code>colors.primary</code> - Hex color code (e.g., #ff0000)</li>
-              <li>• <code>navigation</code> - Site navigation structure</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-blue-800 mb-2">Optional Fields</h4>
-            <ul className="space-y-1 text-blue-700">
-              <li>• <code>$schema</code> - For IDE autocomplete</li>
-              <li>• <code>description</code> - For SEO and AI indexing</li>
-              <li>• <code>logo</code> - Site logo configuration</li>
-              <li>• <code>favicon</code> - Site favicon</li>
-              <li>• <code>integrations</code> - Analytics and other services</li>
-            </ul>
+        {/* Quick Reference */}
+        <div className="border-t dark:border-white/10 pt-4">
+          <h4 className="text-sm font-medium text-zinc-950 dark:text-white mb-2">Quick Reference</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <div className="font-medium text-zinc-950/80 dark:text-white/80 mb-1">Required Fields</div>
+              <ul className="space-y-0.5 text-zinc-950/70 dark:text-white/70">
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">theme</code> - mint, maple, palm, willow, linden, almond, aspen</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">name</code> - Your documentation site name</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">colors.primary</code> - Hex color code (e.g., #ff0000)</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">navigation</code> - Site navigation structure</li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-medium text-zinc-950/80 dark:text-white/80 mb-1">Optional Fields</div>
+              <ul className="space-y-0.5 text-zinc-950/70 dark:text-white/70">
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">$schema</code> - For IDE autocomplete</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">description</code> - For SEO and AI indexing</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">logo</code> - Site logo configuration</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">favicon</code> - Site favicon</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
-
-export default DocsJsonSandbox;
+  )
+}
