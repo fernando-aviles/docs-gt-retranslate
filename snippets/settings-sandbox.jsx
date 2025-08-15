@@ -78,8 +78,11 @@ export const DocsJsonSandbox = () => {
           // Check for reserved paths
           if (group.pages) {
             group.pages.forEach(page => {
-              if (typeof page === 'string' && (page.includes('/api') || page.includes('/mcp'))) {
-                warnings.push(`Page '${page}' uses reserved path. /api and /mcp paths are reserved and may cause 404 errors`)
+              if (typeof page === 'string') {
+                const pathParts = page.split('/')
+                if (pathParts.includes('mcp')) {
+                  warnings.push(`Page '${page}' uses reserved path. /mcp paths are reserved and may cause 404 errors`)
+                }
               }
             })
           }
@@ -109,11 +112,11 @@ export const DocsJsonSandbox = () => {
 
     // Best practices warnings
     if (!config.$schema) {
-      warnings.push("Consider adding '$schema': 'https://mintlify.com/docs.json' for better IDE support")
+      warnings.push('Consider adding "$schema": "https://mintlify.com/docs.json" for better IDE support.')
     }
 
     if (!config.description) {
-      warnings.push("Consider adding 'description' for better SEO and AI indexing")
+      warnings.push('Consider adding a "description" for better SEO and AI indexing.')
     }
 
     return { errors, warnings, isValid: errors.length === 0 }
@@ -329,7 +332,6 @@ export const DocsJsonSandbox = () => {
             <div className="space-y-2">
               {validationResult?.isValid && (
                 <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs">
-                  <span className="text-green-600 dark:text-green-400">✅</span>
                   <span className="text-green-700 dark:text-green-300 font-medium">Valid <code>docs.json</code> configuration.</span>
                 </div>
               )}
@@ -341,7 +343,7 @@ export const DocsJsonSandbox = () => {
                   </h4>
                   {validationResult.errors.map((error, index) => (
                     <div key={index} className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-700 dark:text-red-300">
-                      ⚠️ {error}
+                      {error}
                     </div>
                   ))}
                 </div>
@@ -354,7 +356,7 @@ export const DocsJsonSandbox = () => {
                   </h4>
                   {validationResult.warnings.map((warning, index) => (
                     <div key={index} className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-700 dark:text-yellow-300">
-                      ℹ️ {warning}
+                      {warning}
                     </div>
                   ))}
                 </div>
