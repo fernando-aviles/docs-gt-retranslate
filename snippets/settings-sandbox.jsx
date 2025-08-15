@@ -251,13 +251,13 @@ export const DocsJsonSandbox = () => {
     <div className="p-4 border dark:border-white/10 rounded-2xl not-prose">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-950 dark:text-white mb-2 flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-zinc-950 dark:text-white mb-2 flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <rect x="4" y="6" width="16" height="16" rx="2" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.5" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l-2 2 2 2M15 12l2 2-2 2" stroke="currentColor" strokeWidth="1.8" />
             </svg>
             Sandbox
-          </h1>
+          </h2>
           <p className="text-sm text-zinc-950/70 dark:text-white/70">
             Test and validate your <code>docs.json</code> configuration.
           </p>
@@ -304,7 +304,7 @@ export const DocsJsonSandbox = () => {
           {/* Editor Panel */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-zinc-950 dark:text-white">Configuration Editor</h3>
+              <h3 className="font-medium text-zinc-950 dark:text-white">Editor</h3>
               <button
                 onClick={() => copyToClipboard(jsonInput)}
                 className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
@@ -323,14 +323,14 @@ export const DocsJsonSandbox = () => {
 
           {/* Preview Panel */}
           <div className="space-y-4">
-            <h3 className="font-medium text-zinc-950 dark:text-white">Live Preview</h3>
+            <h3 className="font-medium text-zinc-950 dark:text-white">Preview</h3>
             
             {/* Validation Results */}
             <div className="space-y-2">
               {validationResult?.isValid && (
                 <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-xs">
                   <span className="text-green-600 dark:text-green-400">✅</span>
-                  <span className="text-green-700 dark:text-green-300 font-medium">Valid docs.json configuration!</span>
+                  <span className="text-green-700 dark:text-green-300 font-medium">Valid <code>docs.json</code> configuration.</span>
                 </div>
               )}
 
