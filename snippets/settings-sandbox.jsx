@@ -150,12 +150,8 @@ export const DocsJsonSandbox = () => {
     })
   }
 
-  // Validation function
-  const validateDocsJson = (config) => {
-    const errors = []
-    const warnings = []
-
-    // Required fields validation
+  // Validation helper functions
+  const validateRequiredFields = (config, errors) => {
     if (!config.theme) {
       errors.push("'theme' is required. Must be one of: mint, maple, palm, willow, linden, almond, aspen")
     } else {
@@ -168,119 +164,16 @@ export const DocsJsonSandbox = () => {
     if (!config.name) {
       errors.push("'name' is required. This is the name of your project, organization, or product")
     }
+  }
 
+  const validateColors = (config, errors) => {
     if (!config.colors || !config.colors.primary) {
       errors.push("'colors.primary' is required. Must be a hex color code starting with #")
     } else if (config.colors.primary && !config.colors.primary.match(/^#[0-9A-Fa-f]{6}$/)) {
       errors.push("'colors.primary' must be a valid hex color code (e.g., #ff0000)")
     }
 
-    if (!config.navigation) {
-      errors.push("'navigation' is required. Define your documentation structure")
-    } else {
-      // Check for reserved paths in all navigation types
-      if (config.navigation.pages) {
-        checkNavigationPaths(config.navigation.pages, warnings, 'Root navigation')
-      }
-      
-      if (config.navigation.groups) {
-        config.navigation.groups.forEach((group, index) => {
-          if (!group.group) {
-            errors.push(`Navigation group at index ${index} is missing 'group' property`)
-          }
-          if (!group.pages || !Array.isArray(group.pages)) {
-            errors.push(`Navigation group '${group.group}' is missing 'pages' array`)
-          }
-        })
-        checkNavigationPaths(config.navigation.groups, warnings)
-      }
-
-      // Validate tabs
-      if (config.navigation.tabs) {
-        config.navigation.tabs.forEach((tab, index) => {
-          if (!tab.tab) {
-            errors.push(`Navigation tab at index ${index} is missing 'tab' property`)
-          }
-          // Validate menu items within tabs
-          if (tab.menu) {
-            tab.menu.forEach((menuItem, menuIndex) => {
-              if (!menuItem.item) {
-                errors.push(`Menu item at index ${menuIndex} in tab '${tab.tab}' is missing 'item' property`)
-              }
-            })
-          }
-        })
-        checkNavigationPaths(config.navigation.tabs, warnings)
-      }
-      
-      // Validate anchors
-      if (config.navigation.anchors) {
-        config.navigation.anchors.forEach((anchor, index) => {
-          if (!anchor.anchor) {
-            errors.push(`Navigation anchor at index ${index} is missing 'anchor' property`)
-          }
-        })
-        checkNavigationPaths(config.navigation.anchors, warnings)
-      }
-      
-      // Validate dropdowns
-      if (config.navigation.dropdowns) {
-        config.navigation.dropdowns.forEach((dropdown, index) => {
-          if (!dropdown.dropdown) {
-            errors.push(`Navigation dropdown at index ${index} is missing 'dropdown' property`)
-          }
-        })
-        checkNavigationPaths(config.navigation.dropdowns, warnings)
-      }
-      
-      // Validate versions
-      if (config.navigation.versions) {
-        config.navigation.versions.forEach((version, index) => {
-          if (!version.version) {
-            errors.push(`Navigation version at index ${index} is missing 'version' property`)
-          }
-          if (version.pages) checkNavigationPaths(version.pages, warnings, `Version '${version.version}'`)
-          if (version.groups) checkNavigationPaths(version.groups, warnings, `Version '${version.version}'`)
-          if (version.tabs) checkNavigationPaths(version.tabs, warnings, `Version '${version.version}'`)
-          if (version.anchors) checkNavigationPaths(version.anchors, warnings, `Version '${version.version}'`)
-          if (version.dropdowns) checkNavigationPaths(version.dropdowns, warnings, `Version '${version.version}'`)
-        })
-      }
-      
-      // Validate languages
-      if (config.navigation.languages) {
-        const validLanguages = ['ar', 'cn', 'zh-Hant', 'en', 'fr', 'de', 'id', 'it', 'jp', 'ko', 'pt-BR', 'ru', 'es', 'tr']
-        config.navigation.languages.forEach((language, index) => {
-          if (!language.language) {
-            errors.push(`Navigation language at index ${index} is missing 'language' property`)
-          } else if (!validLanguages.includes(language.language)) {
-            warnings.push(`Language code '${language.language}' may not be supported. Supported codes: ${validLanguages.join(', ')}`)
-          }
-          if (language.pages) checkNavigationPaths(language.pages, warnings, `Language '${language.language}'`)
-          if (language.groups) checkNavigationPaths(language.groups, warnings, `Language '${language.language}'`)
-          if (language.tabs) checkNavigationPaths(language.tabs, warnings, `Language '${language.language}'`)
-          if (language.anchors) checkNavigationPaths(language.anchors, warnings, `Language '${language.language}'`)
-          if (language.dropdowns) checkNavigationPaths(language.dropdowns, warnings, `Language '${language.language}'`)
-        })
-      }
-      
-      // Validate global anchors
-      if (config.navigation.global?.anchors) {
-        config.navigation.global.anchors.forEach((anchor, index) => {
-          if (!anchor.anchor) {
-            errors.push(`Global anchor at index ${index} is missing 'anchor' property`)
-          }
-          if (!anchor.href) {
-            errors.push(`Global anchor '${anchor.anchor}' is missing 'href' property`)
-          } else if (!anchor.href.startsWith('http')) {
-            errors.push(`Global anchor '${anchor.anchor}' href must be an external URL starting with http/https`)
-          }
-        })
-        checkNavigationPaths(config.navigation.global.anchors, warnings, 'Global anchors')
-      }
-    }
-
-    // Optional field validation
+    // Optional color validation
     if (config.colors) {
       ['light', 'dark'].forEach(mode => {
         if (config.colors[mode] && !config.colors[mode].match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -288,7 +181,117 @@ export const DocsJsonSandbox = () => {
         }
       })
     }
+  }
 
+  const validateNavigation = (config, errors, warnings) => {
+    if (!config.navigation) {
+      errors.push("'navigation' is required. Define your documentation structure")
+      return
+    }
+
+    // Check for reserved paths in all navigation types
+    if (config.navigation.pages) {
+      checkNavigationPaths(config.navigation.pages, warnings, 'Root navigation')
+    }
+    
+    if (config.navigation.groups) {
+      config.navigation.groups.forEach((group, index) => {
+        if (!group.group) {
+          errors.push(`Navigation group at index ${index} is missing 'group' property`)
+        }
+        if (!group.pages || !Array.isArray(group.pages)) {
+          errors.push(`Navigation group '${group.group}' is missing 'pages' array`)
+        }
+      })
+      checkNavigationPaths(config.navigation.groups, warnings)
+    }
+
+    // Validate tabs
+    if (config.navigation.tabs) {
+      config.navigation.tabs.forEach((tab, index) => {
+        if (!tab.tab) {
+          errors.push(`Navigation tab at index ${index} is missing 'tab' property`)
+        }
+        // Validate menu items within tabs
+        if (tab.menu) {
+          tab.menu.forEach((menuItem, menuIndex) => {
+            if (!menuItem.item) {
+              errors.push(`Menu item at index ${menuIndex} in tab '${tab.tab}' is missing 'item' property`)
+            }
+          })
+        }
+      })
+      checkNavigationPaths(config.navigation.tabs, warnings)
+    }
+    
+    // Validate anchors
+    if (config.navigation.anchors) {
+      config.navigation.anchors.forEach((anchor, index) => {
+        if (!anchor.anchor) {
+          errors.push(`Navigation anchor at index ${index} is missing 'anchor' property`)
+        }
+      })
+      checkNavigationPaths(config.navigation.anchors, warnings)
+    }
+    
+    // Validate dropdowns
+    if (config.navigation.dropdowns) {
+      config.navigation.dropdowns.forEach((dropdown, index) => {
+        if (!dropdown.dropdown) {
+          errors.push(`Navigation dropdown at index ${index} is missing 'dropdown' property`)
+        }
+      })
+      checkNavigationPaths(config.navigation.dropdowns, warnings)
+    }
+    
+    // Validate versions
+    if (config.navigation.versions) {
+      config.navigation.versions.forEach((version, index) => {
+        if (!version.version) {
+          errors.push(`Navigation version at index ${index} is missing 'version' property`)
+        }
+        if (version.pages) checkNavigationPaths(version.pages, warnings, `Version '${version.version}'`)
+        if (version.groups) checkNavigationPaths(version.groups, warnings, `Version '${version.version}'`)
+        if (version.tabs) checkNavigationPaths(version.tabs, warnings, `Version '${version.version}'`)
+        if (version.anchors) checkNavigationPaths(version.anchors, warnings, `Version '${version.version}'`)
+        if (version.dropdowns) checkNavigationPaths(version.dropdowns, warnings, `Version '${version.version}'`)
+      })
+    }
+    
+    // Validate languages
+    if (config.navigation.languages) {
+      const validLanguages = ['ar', 'cn', 'zh-Hant', 'en', 'fr', 'de', 'id', 'it', 'jp', 'ko', 'pt-BR', 'ru', 'es', 'tr']
+      config.navigation.languages.forEach((language, index) => {
+        if (!language.language) {
+          errors.push(`Navigation language at index ${index} is missing 'language' property`)
+        } else if (!validLanguages.includes(language.language)) {
+          warnings.push(`Language code '${language.language}' may not be supported. Supported codes: ${validLanguages.join(', ')}`)
+        }
+        if (language.pages) checkNavigationPaths(language.pages, warnings, `Language '${language.language}'`)
+        if (language.groups) checkNavigationPaths(language.groups, warnings, `Language '${language.language}'`)
+        if (language.tabs) checkNavigationPaths(language.tabs, warnings, `Language '${language.language}'`)
+        if (language.anchors) checkNavigationPaths(language.anchors, warnings, `Language '${language.language}'`)
+        if (language.dropdowns) checkNavigationPaths(language.dropdowns, warnings, `Language '${language.language}'`)
+      })
+    }
+    
+    // Validate global anchors
+    if (config.navigation.global?.anchors) {
+      config.navigation.global.anchors.forEach((anchor, index) => {
+        if (!anchor.anchor) {
+          errors.push(`Global anchor at index ${index} is missing 'anchor' property`)
+        }
+        if (!anchor.href) {
+          errors.push(`Global anchor '${anchor.anchor}' is missing 'href' property`)
+        } else if (!anchor.href.startsWith('http')) {
+          errors.push(`Global anchor '${anchor.anchor}' href must be an external URL starting with http/https`)
+        }
+      })
+      checkNavigationPaths(config.navigation.global.anchors, warnings, 'Global anchors')
+    }
+  }
+
+  const validateAssets = (config, warnings) => {
     // Logo validation
     if (config.logo) {
       if (typeof config.logo === 'object') {
@@ -302,28 +305,24 @@ export const DocsJsonSandbox = () => {
     if (config.favicon && !config.favicon.match(/\.(ico|png|svg)$/i)) {
       warnings.push("Favicon should typically be an .ico, .png, or .svg file")
     }
+  }
 
-    // Theme validation
-    const validThemes = ['mint', 'maple', 'palm', 'willow', 'linden', 'almond', 'aspen']
-    if (config.theme && !validThemes.includes(config.theme)) {
-      errors.push(`Invalid theme '${config.theme}'. Must be one of: ${validThemes.join(', ')}`)
-    }
+  const validateIntegrations = (config, warnings) => {
+    if (!config.integrations) return
 
-    // Integrations validation
-    if (config.integrations) {
-      if (config.integrations.ga4 && config.integrations.ga4.measurementId) {
-        if (!config.integrations.ga4.measurementId.match(/^G-[A-Z0-9]+$/)) {
-          warnings.push("Google Analytics 4 measurement ID should follow format 'G-XXXXXXXXX'")
-        }
-      }
-      if (config.integrations.gtm && config.integrations.gtm.containerId) {
-        if (!config.integrations.gtm.containerId.match(/^GTM-[A-Z0-9]+$/)) {
-          warnings.push("Google Tag Manager container ID should follow format 'GTM-XXXXXXX'")
-        }
+    if (config.integrations.ga4 && config.integrations.ga4.measurementId) {
+      if (!config.integrations.ga4.measurementId.match(/^G-[A-Z0-9]+$/)) {
+        warnings.push("Google Analytics 4 measurement ID should follow format 'G-XXXXXXXXX'")
       }
     }
+    if (config.integrations.gtm && config.integrations.gtm.containerId) {
+      if (!config.integrations.gtm.containerId.match(/^GTM-[A-Z0-9]+$/)) {
+        warnings.push("Google Tag Manager container ID should follow format 'GTM-XXXXXXX'")
+      }
+    }
+  }
 
-    // Best practices warnings
+  const validateBestPractices = (config, warnings) => {
     if (!config.$schema) {
       warnings.push('Consider adding "$schema": "https://mintlify.com/docs.json" for better IDE support.')
     }
@@ -339,6 +338,20 @@ export const DocsJsonSandbox = () => {
     if (!config.logo) {
       warnings.push('Consider adding a "logo" configuration for better branding.')
     }
+  }
+
+  // Main validation orchestrator function
+  const validateDocsJson = (config) => {
+    const errors = []
+    const warnings = []
+
+    // Run all validation checks
+    validateRequiredFields(config, errors)
+    validateColors(config, errors)
+    validateNavigation(config, errors, warnings)
+    validateAssets(config, warnings)
+    validateIntegrations(config, warnings)
+    validateBestPractices(config, warnings)
 
     return { errors, warnings, isValid: errors.length === 0 }
   }
