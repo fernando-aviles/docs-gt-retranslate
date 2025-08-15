@@ -262,7 +262,7 @@ export const DocsJsonSandbox = () => {
             Sandbox
           </h2>
           <p className="text-sm text-zinc-950/70 dark:text-white/70">
-            Test and validate your <code>docs.json</code> configuration.
+            Test and validate your <code>docs.json</code> configuration. Start with one of the examples below or paste your <code>docs.json</code> into the editor.
           </p>
         </div>
 
