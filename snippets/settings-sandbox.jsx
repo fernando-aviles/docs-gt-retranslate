@@ -703,7 +703,7 @@ export const DocsJsonSandbox = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Editor Panel */}
-          <div className="space-y-4">
+          <div className="flex flex-col space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-medium text-zinc-950 dark:text-white">Editor</h3>
               <button
@@ -717,13 +717,13 @@ export const DocsJsonSandbox = () => {
             <textarea
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
-              className="w-full h-80 p-3 border dark:border-white/10 rounded-lg font-mono text-xs resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white"
+              className="w-full flex-1 p-3 border dark:border-white/10 rounded-lg font-mono text-xs resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white"
               placeholder="Enter your docs.json configuration here..."
             />
           </div>
 
           {/* Preview Panel */}
-          <div className="space-y-4">
+          <div className="flex flex-col space-y-4">
             <h3 className="font-medium text-zinc-950 dark:text-white">Preview</h3>
             
             {/* Validation Results */}
