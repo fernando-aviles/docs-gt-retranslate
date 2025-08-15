@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 
 export const DocsJsonSandbox = () => {
   const [jsonInput, setJsonInput] = useState('')
-  const [validationResult, setValidationResult] = useState(null)
-  const [parsedConfig, setParsedConfig] = useState(null)
 
   // Default example configuration
   const defaultConfig = {
@@ -37,8 +35,8 @@ export const DocsJsonSandbox = () => {
     setJsonInput(JSON.stringify(defaultConfig, null, 2))
   }, [])
 
-  // Helper function to recursively check navigation paths for reserved words
-  const checkNavigationPaths = (items, warnings, context = '') => {
+  // Memoized helper function to recursively check navigation paths for reserved words
+  const checkNavigationPaths = useCallback((items, warnings, context = '') => {
     if (!Array.isArray(items)) return
     
     items.forEach((item) => {
@@ -70,10 +68,10 @@ export const DocsJsonSandbox = () => {
         }
       }
     })
-  }
+  }, [])
 
-  // Helper function to render navigation items recursively
-  const renderNavigationItems = (items, depth = 0) => {
+  // Memoized helper function to render navigation items recursively
+  const renderNavigationItems = useCallback((items, depth = 0) => {
     if (!Array.isArray(items)) return null
     
     return items.map((item, index) => {
@@ -148,10 +146,10 @@ export const DocsJsonSandbox = () => {
       
       return null
     })
-  }
+  }, [])
 
-  // Validation helper functions
-  const validateRequiredFields = (config, errors) => {
+  // Memoized validation helper functions
+  const validateRequiredFields = useCallback((config, errors) => {
     if (!config.theme) {
       errors.push("'theme' is required. Must be one of: mint, maple, palm, willow, linden, almond, aspen")
     } else {
@@ -164,9 +162,9 @@ export const DocsJsonSandbox = () => {
     if (!config.name) {
       errors.push("'name' is required. This is the name of your project, organization, or product")
     }
-  }
+  }, [])
 
-  const validateColors = (config, errors) => {
+  const validateColors = useCallback((config, errors) => {
     if (!config.colors || !config.colors.primary) {
       errors.push("'colors.primary' is required. Must be a hex color code starting with #")
     } else if (config.colors.primary && !config.colors.primary.match(/^#[0-9A-Fa-f]{6}$/)) {
@@ -181,9 +179,9 @@ export const DocsJsonSandbox = () => {
         }
       })
     }
-  }
+  }, [])
 
-  const validateNavigation = (config, errors, warnings) => {
+  const validateNavigation = useCallback((config, errors, warnings) => {
     if (!config.navigation) {
       errors.push("'navigation' is required. Define your documentation structure")
       return
@@ -289,9 +287,9 @@ export const DocsJsonSandbox = () => {
       })
       checkNavigationPaths(config.navigation.global.anchors, warnings, 'Global anchors')
     }
-  }
+  }, [checkNavigationPaths])
 
-  const validateAssets = (config, warnings) => {
+  const validateAssets = useCallback((config, warnings) => {
     // Logo validation
     if (config.logo) {
       if (typeof config.logo === 'object') {
@@ -305,9 +303,9 @@ export const DocsJsonSandbox = () => {
     if (config.favicon && !config.favicon.match(/\.(ico|png|svg)$/i)) {
       warnings.push("Favicon should typically be an .ico, .png, or .svg file")
     }
-  }
+  }, [])
 
-  const validateIntegrations = (config, warnings) => {
+  const validateIntegrations = useCallback((config, warnings) => {
     if (!config.integrations) return
 
     if (config.integrations.ga4 && config.integrations.ga4.measurementId) {
@@ -320,9 +318,9 @@ export const DocsJsonSandbox = () => {
         warnings.push("Google Tag Manager container ID should follow format 'GTM-XXXXXXX'")
       }
     }
-  }
+  }, [])
 
-  const validateBestPractices = (config, warnings) => {
+  const validateBestPractices = useCallback((config, warnings) => {
     if (!config.$schema) {
       warnings.push('Consider adding "$schema": "https://mintlify.com/docs.json" for better IDE support.')
     }
@@ -338,10 +336,10 @@ export const DocsJsonSandbox = () => {
     if (!config.logo) {
       warnings.push('Consider adding a "logo" configuration for better branding.')
     }
-  }
+  }, [])
 
-  // Main validation orchestrator function
-  const validateDocsJson = (config) => {
+  // Memoized main validation orchestrator function
+  const validateDocsJson = useCallback((config) => {
     const errors = []
     const warnings = []
 
@@ -354,29 +352,32 @@ export const DocsJsonSandbox = () => {
     validateBestPractices(config, warnings)
 
     return { errors, warnings, isValid: errors.length === 0 }
-  }
+  }, [validateRequiredFields, validateColors, validateNavigation, validateAssets, validateIntegrations, validateBestPractices])
 
-  useEffect(() => {
-    if (!jsonInput.trim()) {
-      setValidationResult(null)
-      setParsedConfig(null)
-      return
-    }
-
+  // Memoize parsed config to avoid re-parsing same JSON
+  const parsedConfig = useMemo(() => {
+    if (!jsonInput.trim()) return null
+    
     try {
-      const parsed = JSON.parse(jsonInput)
-      setParsedConfig(parsed)
-      const validation = validateDocsJson(parsed)
-      setValidationResult(validation)
+      return JSON.parse(jsonInput)
     } catch (error) {
-      setValidationResult({
-        errors: [`JSON Parse Error: ${error.message}`],
-        warnings: [],
-        isValid: false
-      })
-      setParsedConfig(null)
+      return null
     }
   }, [jsonInput])
+
+  // Memoize validation result to avoid re-validating same config
+  const validationResult = useMemo(() => {
+    if (!jsonInput.trim()) return null
+    if (!parsedConfig) {
+      return {
+        errors: [`JSON Parse Error: Invalid JSON format`],
+        warnings: [],
+        isValid: false
+      }
+    }
+    
+    return validateDocsJson(parsedConfig)
+  }, [parsedConfig, validateDocsJson])
 
   const loadExample = (example) => {
     const examples = {
