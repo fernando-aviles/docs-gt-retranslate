@@ -37,6 +37,41 @@ export const DocsJsonSandbox = () => {
     setJsonInput(JSON.stringify(defaultConfig, null, 2))
   }, [])
 
+  // Helper function to recursively check navigation paths for reserved words
+  const checkNavigationPaths = (items, warnings, context = '') => {
+    if (!Array.isArray(items)) return
+    
+    items.forEach((item) => {
+      if (typeof item === 'string') {
+        // Direct page path
+        const pathParts = item.split('/')
+        if (pathParts.includes('mcp')) {
+          warnings.push(`${context} page '${item}' uses reserved path. /mcp paths are reserved and may cause 404 errors`)
+        }
+      } else if (typeof item === 'object' && item !== null) {
+        // Check nested navigation structures
+        if (item.pages) {
+          checkNavigationPaths(item.pages, warnings, context || `Navigation item '${item.group || item.item || item.tab || item.anchor || item.dropdown}'`)
+        }
+        if (item.groups) {
+          checkNavigationPaths(item.groups, warnings, context)
+        }
+        if (item.menu) {
+          checkNavigationPaths(item.menu, warnings, context || `Tab '${item.tab}'`)
+        }
+        if (item.href && typeof item.href === 'string') {
+          // Check href paths (only relative paths)
+          if (!item.href.startsWith('http')) {
+            const pathParts = item.href.split('/')
+            if (pathParts.includes('mcp')) {
+              warnings.push(`${context} href '${item.href}' uses reserved path. /mcp paths are reserved and may cause 404 errors`)
+            }
+          }
+        }
+      }
+    })
+  }
+
   // Validation function
   const validateDocsJson = (config) => {
     const errors = []
@@ -65,7 +100,11 @@ export const DocsJsonSandbox = () => {
     if (!config.navigation) {
       errors.push("'navigation' is required. Define your documentation structure")
     } else {
-      // Validate navigation structure
+      // Check for reserved paths in all navigation types
+      if (config.navigation.pages) {
+        checkNavigationPaths(config.navigation.pages, warnings, 'Root navigation')
+      }
+      
       if (config.navigation.groups) {
         config.navigation.groups.forEach((group, index) => {
           if (!group.group) {
@@ -74,30 +113,92 @@ export const DocsJsonSandbox = () => {
           if (!group.pages || !Array.isArray(group.pages)) {
             errors.push(`Navigation group '${group.group}' is missing 'pages' array`)
           }
-          
-          // Check for reserved paths
-          if (group.pages) {
-            group.pages.forEach(page => {
-              if (typeof page === 'string') {
-                const pathParts = page.split('/')
-                if (pathParts.includes('mcp')) {
-                  warnings.push(`Page '${page}' uses reserved path. /mcp paths are reserved and may cause 404 errors`)
-                }
+        })
+        checkNavigationPaths(config.navigation.groups, warnings)
+      }
+
+      // Validate tabs
+      if (config.navigation.tabs) {
+        config.navigation.tabs.forEach((tab, index) => {
+          if (!tab.tab) {
+            errors.push(`Navigation tab at index ${index} is missing 'tab' property`)
+          }
+          // Validate menu items within tabs
+          if (tab.menu) {
+            tab.menu.forEach((menuItem, menuIndex) => {
+              if (!menuItem.item) {
+                errors.push(`Menu item at index ${menuIndex} in tab '${tab.tab}' is missing 'item' property`)
               }
             })
           }
         })
+        checkNavigationPaths(config.navigation.tabs, warnings)
       }
-
-      if (config.navigation.tabs) {
-        config.navigation.tabs.forEach((tab, index) => {
-          if (!tab.name) {
-            errors.push(`Navigation tab at index ${index} is missing 'name' property`)
-          }
-          if (!tab.url) {
-            errors.push(`Navigation tab '${tab.name}' is missing 'url' property`)
+      
+      // Validate anchors
+      if (config.navigation.anchors) {
+        config.navigation.anchors.forEach((anchor, index) => {
+          if (!anchor.anchor) {
+            errors.push(`Navigation anchor at index ${index} is missing 'anchor' property`)
           }
         })
+        checkNavigationPaths(config.navigation.anchors, warnings)
+      }
+      
+      // Validate dropdowns
+      if (config.navigation.dropdowns) {
+        config.navigation.dropdowns.forEach((dropdown, index) => {
+          if (!dropdown.dropdown) {
+            errors.push(`Navigation dropdown at index ${index} is missing 'dropdown' property`)
+          }
+        })
+        checkNavigationPaths(config.navigation.dropdowns, warnings)
+      }
+      
+      // Validate versions
+      if (config.navigation.versions) {
+        config.navigation.versions.forEach((version, index) => {
+          if (!version.version) {
+            errors.push(`Navigation version at index ${index} is missing 'version' property`)
+          }
+          if (version.pages) checkNavigationPaths(version.pages, warnings, `Version '${version.version}'`)
+          if (version.groups) checkNavigationPaths(version.groups, warnings, `Version '${version.version}'`)
+          if (version.tabs) checkNavigationPaths(version.tabs, warnings, `Version '${version.version}'`)
+          if (version.anchors) checkNavigationPaths(version.anchors, warnings, `Version '${version.version}'`)
+          if (version.dropdowns) checkNavigationPaths(version.dropdowns, warnings, `Version '${version.version}'`)
+        })
+      }
+      
+      // Validate languages
+      if (config.navigation.languages) {
+        const validLanguages = ['ar', 'cn', 'zh-Hant', 'en', 'fr', 'de', 'id', 'it', 'jp', 'ko', 'pt-BR', 'ru', 'es', 'tr']
+        config.navigation.languages.forEach((language, index) => {
+          if (!language.language) {
+            errors.push(`Navigation language at index ${index} is missing 'language' property`)
+          } else if (!validLanguages.includes(language.language)) {
+            warnings.push(`Language code '${language.language}' may not be supported. Supported codes: ${validLanguages.join(', ')}`)
+          }
+          if (language.pages) checkNavigationPaths(language.pages, warnings, `Language '${language.language}'`)
+          if (language.groups) checkNavigationPaths(language.groups, warnings, `Language '${language.language}'`)
+          if (language.tabs) checkNavigationPaths(language.tabs, warnings, `Language '${language.language}'`)
+          if (language.anchors) checkNavigationPaths(language.anchors, warnings, `Language '${language.language}'`)
+          if (language.dropdowns) checkNavigationPaths(language.dropdowns, warnings, `Language '${language.language}'`)
+        })
+      }
+      
+      // Validate global anchors
+      if (config.navigation.global?.anchors) {
+        config.navigation.global.anchors.forEach((anchor, index) => {
+          if (!anchor.anchor) {
+            errors.push(`Global anchor at index ${index} is missing 'anchor' property`)
+          }
+          if (!anchor.href) {
+            errors.push(`Global anchor '${anchor.anchor}' is missing 'href' property`)
+          } else if (!anchor.href.startsWith('http')) {
+            errors.push(`Global anchor '${anchor.anchor}' href must be an external URL starting with http/https`)
+          }
+        })
+        checkNavigationPaths(config.navigation.global.anchors, warnings, 'Global anchors')
       }
     }
 
@@ -110,6 +211,40 @@ export const DocsJsonSandbox = () => {
       })
     }
 
+    // Logo validation
+    if (config.logo) {
+      if (typeof config.logo === 'object') {
+        if (config.logo.href && !config.logo.href.match(/^https?:\/\//)) {
+          warnings.push("Logo 'href' should be a complete URL starting with http:// or https://")
+        }
+      }
+    }
+
+    // Favicon validation
+    if (config.favicon && !config.favicon.match(/\.(ico|png|svg)$/i)) {
+      warnings.push("Favicon should typically be an .ico, .png, or .svg file")
+    }
+
+    // Theme validation
+    const validThemes = ['mint', 'maple', 'palm', 'willow', 'linden', 'almond', 'aspen']
+    if (config.theme && !validThemes.includes(config.theme)) {
+      errors.push(`Invalid theme '${config.theme}'. Must be one of: ${validThemes.join(', ')}`)
+    }
+
+    // Integrations validation
+    if (config.integrations) {
+      if (config.integrations.ga4 && config.integrations.ga4.measurementId) {
+        if (!config.integrations.ga4.measurementId.match(/^G-[A-Z0-9]+$/)) {
+          warnings.push("Google Analytics 4 measurement ID should follow format 'G-XXXXXXXXX'")
+        }
+      }
+      if (config.integrations.gtm && config.integrations.gtm.containerId) {
+        if (!config.integrations.gtm.containerId.match(/^GTM-[A-Z0-9]+$/)) {
+          warnings.push("Google Tag Manager container ID should follow format 'GTM-XXXXXXX'")
+        }
+      }
+    }
+
     // Best practices warnings
     if (!config.$schema) {
       warnings.push('Consider adding "$schema": "https://mintlify.com/docs.json" for better IDE support.')
@@ -117,6 +252,14 @@ export const DocsJsonSandbox = () => {
 
     if (!config.description) {
       warnings.push('Consider adding a "description" for better SEO and AI indexing.')
+    }
+
+    if (!config.favicon) {
+      warnings.push('Consider adding a "favicon" for better branding.')
+    }
+
+    if (!config.logo) {
+      warnings.push('Consider adding a "logo" configuration for better branding.')
     }
 
     return { errors, warnings, isValid: errors.length === 0 }
@@ -154,11 +297,9 @@ export const DocsJsonSandbox = () => {
           "primary": "#10B981"
         },
         "navigation": {
-          "groups": [
-            {
-              "group": "Getting Started",
-              "pages": ["introduction"]
-            }
+          "pages": [
+            "introduction",
+            "quickstart"
           ]
         }
       },
@@ -166,7 +307,7 @@ export const DocsJsonSandbox = () => {
         "$schema": "https://mintlify.com/docs.json",
         "theme": "maple",
         "name": "Complete Documentation",
-        "description": "Comprehensive documentation site with all features",
+        "description": "Comprehensive documentation site with all navigation features",
         "colors": {
           "primary": "#F59E0B",
           "light": "#FCD34D",
@@ -179,30 +320,115 @@ export const DocsJsonSandbox = () => {
         },
         "favicon": "/favicon.ico",
         "navigation": {
-          "tabs": [
+          "global": {
+            "anchors": [
+              {
+                "anchor": "Community",
+                "icon": "users",
+                "href": "https://discord.gg/example"
+              },
+              {
+                "anchor": "Blog",
+                "icon": "newspaper",
+                "href": "https://example.com/blog"
+              }
+            ]
+          },
+          "versions": [
             {
-              "name": "Documentation",
-              "url": "docs"
-            },
-            {
-              "name": "API Reference",
-              "url": "api"
-            }
-          ],
-          "groups": [
-            {
-              "group": "Getting Started",
-              "pages": [
-                "introduction",
-                "quickstart",
-                "installation"
+              "version": "2.0",
+              "groups": [
+                {
+                  "group": "Getting Started",
+                  "icon": "play",
+                  "pages": [
+                    "v2/introduction",
+                    "v2/quickstart"
+                  ]
+                }
               ]
             },
             {
-              "group": "Guides",
+              "version": "1.0",
+              "groups": [
+                {
+                  "group": "Getting Started",
+                  "pages": [
+                    "v1/introduction",
+                    "v1/quickstart"
+                  ]
+                }
+              ]
+            }
+          ],
+          "tabs": [
+            {
+              "tab": "Documentation",
+              "groups": [
+                {
+                  "group": "Getting Started",
+                  "icon": "play",
+                  "pages": [
+                    "introduction",
+                    "quickstart",
+                    "installation"
+                  ]
+                },
+                {
+                  "group": "Advanced",
+                  "icon": "cog",
+                  "pages": [
+                    "advanced/configuration",
+                    "advanced/customization"
+                  ]
+                }
+              ]
+            },
+            {
+              "tab": "API Reference",
+              "menu": [
+                {
+                  "item": "Authentication",
+                  "icon": "key",
+                  "pages": [
+                    "api/auth/overview",
+                    "api/auth/tokens"
+                  ]
+                },
+                {
+                  "item": "Endpoints",
+                  "icon": "globe",
+                  "groups": [
+                    {
+                      "group": "Users",
+                      "pages": [
+                        "GET /users",
+                        "POST /users",
+                        "DELETE /users/{id}"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "anchors": [
+            {
+              "anchor": "Help Center",
+              "icon": "question-mark-circle",
               "pages": [
-                "guides/authentication",
-                "guides/errors"
+                "help/faq",
+                "help/troubleshooting"
+              ]
+            }
+          ],
+          "dropdowns": [
+            {
+              "dropdown": "Resources",
+              "icon": "book-open",
+              "pages": [
+                "resources/examples",
+                "resources/templates"
               ]
             }
           ]
@@ -217,18 +443,101 @@ export const DocsJsonSandbox = () => {
         "$schema": "https://mintlify.com/docs.json",
         "theme": "willow",
         "name": "API Documentation",
+        "description": "RESTful API documentation with OpenAPI integration",
         "colors": {
           "primary": "#8B5CF6"
         },
         "navigation": {
-          "groups": [
+          "anchors": [
             {
-              "group": "API Reference",
-              "openapi": "/openapi.json",
-              "pages": [
-                "GET /users",
-                "POST /users",
-                "DELETE /users/{id}"
+              "anchor": "API Reference",
+              "icon": "code",
+              "groups": [
+                {
+                  "group": "Authentication",
+                  "icon": "key",
+                  "pages": [
+                    "auth/overview",
+                    "auth/api-keys",
+                    "auth/oauth"
+                  ]
+                },
+                {
+                  "group": "Core API",
+                  "icon": "server",
+                  "openapi": "/openapi.json",
+                  "pages": [
+                    "GET /users",
+                    "POST /users",
+                    "PUT /users/{id}",
+                    "DELETE /users/{id}",
+                    "GET /projects",
+                    "POST /projects"
+                  ]
+                }
+              ]
+            },
+            {
+              "anchor": "SDKs",
+              "icon": "code",
+              "groups": [
+                {
+                  "group": "Client Libraries",
+                  "pages": [
+                    "sdks/javascript",
+                    "sdks/python",
+                    "sdks/go"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      multilingual: {
+        "$schema": "https://mintlify.com/docs.json",
+        "theme": "palm",
+        "name": "Multilingual Documentation",
+        "description": "Documentation site with multiple language support",
+        "colors": {
+          "primary": "#059669"
+        },
+        "navigation": {
+          "languages": [
+            {
+              "language": "en",
+              "groups": [
+                {
+                  "group": "Getting Started",
+                  "pages": [
+                    "en/introduction",
+                    "en/quickstart"
+                  ]
+                }
+              ]
+            },
+            {
+              "language": "es",
+              "groups": [
+                {
+                  "group": "Comenzando",
+                  "pages": [
+                    "es/introduccion",
+                    "es/inicio-rapido"
+                  ]
+                }
+              ]
+            },
+            {
+              "language": "fr",
+              "groups": [
+                {
+                  "group": "Commencer",
+                  "pages": [
+                    "fr/introduction",
+                    "fr/demarrage-rapide"
+                  ]
+                }
               ]
             }
           ]
@@ -267,16 +576,16 @@ export const DocsJsonSandbox = () => {
         </div>
 
         {/* Example Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
             <button
               onClick={() => loadExample('minimal')}
               className="w-full px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-300 font-medium"
             >
-              Minimal example
+              Minimal
             </button>
             <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
-              Basic configuration with only required fields.
+              Basic configuration with simple pages navigation.
             </p>
           </div>
           <div className="text-center">
@@ -284,10 +593,10 @@ export const DocsJsonSandbox = () => {
               onClick={() => loadExample('complete')}
               className="w-full px-3 py-2 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-300 font-medium"
             >
-              Complete example
+              Complete
             </button>
             <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
-              Full-featured example.
+              Advanced setup with tabs, anchors, dropdowns, versions, and global links.
             </p>
           </div>
           <div className="text-center">
@@ -295,10 +604,21 @@ export const DocsJsonSandbox = () => {
               onClick={() => loadExample('api')}
               className="w-full px-3 py-2 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors dark:bg-purple-900/30 dark:text-purple-300 font-medium"
             >
-              API documentation example
+              API Docs
             </button>
             <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
-              API-focused configuration with OpenAPI integration.
+              API documentation with anchors, groups, and OpenAPI integration.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => loadExample('multilingual')}
+              className="w-full px-3 py-2 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors dark:bg-emerald-900/30 dark:text-emerald-300 font-medium"
+            >
+              Multilingual
+            </button>
+            <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
+              Multi-language documentation with language-specific navigation.
             </p>
           </div>
         </div>
@@ -400,14 +720,98 @@ export const DocsJsonSandbox = () => {
                   <div className="border dark:border-white/10 rounded-lg p-3">
                     <h4 className="text-xs font-medium text-zinc-950 dark:text-white mb-2">Navigation Structure</h4>
                     
+                    {/* Versions */}
+                    {parsedConfig.navigation.versions && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Versions:</div>
+                        <div className="flex gap-1 flex-wrap">
+                          {parsedConfig.navigation.versions.map((version, index) => (
+                            <div key={index} className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
+                              v{version.version}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Languages */}
+                    {parsedConfig.navigation.languages && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Languages:</div>
+                        <div className="flex gap-1 flex-wrap">
+                          {parsedConfig.navigation.languages.map((language, index) => (
+                            <div key={index} className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
+                              {language.language}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Global Anchors */}
+                    {parsedConfig.navigation.global?.anchors && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Global Anchors:</div>
+                        <div className="space-y-1">
+                          {parsedConfig.navigation.global.anchors.map((anchor, index) => (
+                            <div key={index} className="flex items-center gap-2 text-xs">
+                              <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded">
+                                {anchor.anchor}
+                              </span>
+                              <span className="text-zinc-950/50 dark:text-white/50">→ {anchor.href}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Tabs */}
                     {parsedConfig.navigation.tabs && (
-                      <div className="mb-2">
+                      <div className="mb-3">
                         <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Tabs:</div>
-                        <div className="flex gap-1">
+                        <div className="space-y-2">
                           {parsedConfig.navigation.tabs.map((tab, index) => (
-                            <div key={index} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
-                              {tab.name}
+                            <div key={index} className="border-l-2 border-blue-200 dark:border-blue-700 pl-2">
+                              <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded inline-block">
+                                {tab.tab}
+                              </div>
+                              {tab.menu && (
+                                <div className="mt-1 ml-2 space-y-0.5">
+                                  {tab.menu.map((menuItem, menuIndex) => (
+                                    <div key={menuIndex} className="text-xs text-zinc-950/70 dark:text-white/70">
+                                      📋 {menuItem.item}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Anchors */}
+                    {parsedConfig.navigation.anchors && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Anchors:</div>
+                        <div className="space-y-1">
+                          {parsedConfig.navigation.anchors.map((anchor, index) => (
+                            <div key={index} className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs rounded inline-block mr-1">
+                              {anchor.anchor}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Dropdowns */}
+                    {parsedConfig.navigation.dropdowns && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Dropdowns:</div>
+                        <div className="space-y-1">
+                          {parsedConfig.navigation.dropdowns.map((dropdown, index) => (
+                            <div key={index} className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded inline-block mr-1">
+                              ▼ {dropdown.dropdown}
                             </div>
                           ))}
                         </div>
@@ -416,23 +820,40 @@ export const DocsJsonSandbox = () => {
 
                     {/* Groups */}
                     {parsedConfig.navigation.groups && (
-                      <div className="space-y-2">
-                        <div className="text-xs text-zinc-950/70 dark:text-white/70">Groups:</div>
-                        {parsedConfig.navigation.groups.map((group, index) => (
-                          <div key={index} className="border-l-2 border-zinc-200 dark:border-zinc-700 pl-2">
-                            <div className="text-xs font-medium text-zinc-950 dark:text-white">{group.group}</div>
-                            {group.pages && (
-                              <div className="mt-1 space-y-0.5">
-                                {group.pages.map((page, pageIndex) => (
-                                  <div key={pageIndex} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1">
-                                    <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
-                                    {typeof page === 'string' ? page : page.toString()}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Groups:</div>
+                        <div className="space-y-2">
+                          {parsedConfig.navigation.groups.map((group, index) => (
+                            <div key={index} className="border-l-2 border-zinc-200 dark:border-zinc-700 pl-2">
+                              <div className="text-xs font-medium text-zinc-950 dark:text-white">{group.group}</div>
+                              {group.pages && (
+                                <div className="mt-1 space-y-0.5">
+                                  {group.pages.map((page, pageIndex) => (
+                                    <div key={pageIndex} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1">
+                                      <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
+                                      {typeof page === 'string' ? page : page.toString()}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Root Pages */}
+                    {parsedConfig.navigation.pages && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Root Pages:</div>
+                        <div className="space-y-0.5">
+                          {parsedConfig.navigation.pages.map((page, pageIndex) => (
+                            <div key={pageIndex} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1">
+                              <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
+                              {typeof page === 'string' ? page : page.toString()}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -445,7 +866,7 @@ export const DocsJsonSandbox = () => {
         {/* Quick Reference */}
         <div className="border-t dark:border-white/10 pt-4">
           <h4 className="text-sm font-medium text-zinc-950 dark:text-white mb-2">Quick Reference</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div>
               <div className="font-medium text-zinc-950/80 dark:text-white/80 mb-1">Required Fields</div>
               <ul className="space-y-0.5 text-zinc-950/70 dark:text-white/70">
@@ -456,12 +877,25 @@ export const DocsJsonSandbox = () => {
               </ul>
             </div>
             <div>
+              <div className="font-medium text-zinc-950/80 dark:text-white/80 mb-1">Navigation Types</div>
+              <ul className="space-y-0.5 text-zinc-950/70 dark:text-white/70">
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">pages</code> - Simple page list</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">groups</code> - Organized sections</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">tabs</code> - Tabbed navigation</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">anchors</code> - Sidebar anchors</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">dropdowns</code> - Dropdown menus</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">versions</code> - Version selector</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">languages</code> - Multi-language</li>
+              </ul>
+            </div>
+            <div>
               <div className="font-medium text-zinc-950/80 dark:text-white/80 mb-1">Optional Fields</div>
               <ul className="space-y-0.5 text-zinc-950/70 dark:text-white/70">
                 <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">$schema</code> - For IDE autocomplete</li>
                 <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">description</code> - For SEO and AI indexing</li>
                 <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">logo</code> - Site logo configuration</li>
                 <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">favicon</code> - Site favicon</li>
+                <li>• <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded">integrations</code> - Analytics & tools</li>
               </ul>
             </div>
           </div>
