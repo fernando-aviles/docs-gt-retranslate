@@ -72,6 +72,84 @@ export const DocsJsonSandbox = () => {
     })
   }
 
+  // Helper function to render navigation items recursively
+  const renderNavigationItems = (items, depth = 0) => {
+    if (!Array.isArray(items)) return null
+    
+    return items.map((item, index) => {
+      const marginLeft = depth * 12
+      
+      if (typeof item === 'string') {
+        // Direct page
+        return (
+          <div key={index} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1" style={{ marginLeft: `${marginLeft}px` }}>
+            <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
+            {item}
+          </div>
+        )
+      } else if (typeof item === 'object' && item !== null) {
+        // Navigation structure (group, tab, anchor, etc.)
+        const title = item.group || item.tab || item.anchor || item.dropdown || item.item || 'Unknown'
+        const isGroup = item.group
+        const isTab = item.tab
+        const isAnchor = item.anchor
+        const isDropdown = item.dropdown
+        const isMenuItem = item.item
+        
+        return (
+          <div key={index} style={{ marginLeft: `${marginLeft}px` }}>
+            <div className={`text-xs font-medium flex items-center gap-1 mb-1 ${
+              isGroup ? 'text-zinc-950 dark:text-white' :
+              isTab ? 'text-blue-700 dark:text-blue-300' :
+              isAnchor ? 'text-indigo-700 dark:text-indigo-300' :
+              isDropdown ? 'text-orange-700 dark:text-orange-300' :
+              isMenuItem ? 'text-gray-700 dark:text-gray-300' :
+              'text-zinc-950 dark:text-white'
+            }`}>
+              {isGroup && '📁'}
+              {isTab && '📋'}
+              {isAnchor && '⚓'}
+              {isDropdown && '▼'}
+              {isMenuItem && '📄'}
+              {title}
+              {item.icon && <span className="text-zinc-500">({item.icon})</span>}
+            </div>
+            
+            {/* Render nested pages */}
+            {item.pages && (
+              <div className="space-y-0.5">
+                {renderNavigationItems(item.pages, depth + 1)}
+              </div>
+            )}
+            
+            {/* Render nested groups */}
+            {item.groups && (
+              <div className="space-y-1">
+                {renderNavigationItems(item.groups, depth + 1)}
+              </div>
+            )}
+            
+            {/* Render menu items */}
+            {item.menu && (
+              <div className="space-y-1">
+                {renderNavigationItems(item.menu, depth + 1)}
+              </div>
+            )}
+            
+            {/* Show href for external links */}
+            {item.href && (
+              <div className="text-xs text-zinc-500 dark:text-zinc-400" style={{ marginLeft: `${(depth + 1) * 12}px` }}>
+                → {item.href}
+              </div>
+            )}
+          </div>
+        )
+      }
+      
+      return null
+    })
+  }
+
   // Validation function
   const validateDocsJson = (config) => {
     const errors = []
@@ -765,97 +843,100 @@ export const DocsJsonSandbox = () => {
                       </div>
                     )}
 
-                    {/* Tabs */}
-                    {parsedConfig.navigation.tabs && (
-                      <div className="mb-3">
-                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Tabs:</div>
-                        <div className="space-y-2">
-                          {parsedConfig.navigation.tabs.map((tab, index) => (
-                            <div key={index} className="border-l-2 border-blue-200 dark:border-blue-700 pl-2">
-                              <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded inline-block">
-                                {tab.tab}
+                    {/* Complete Navigation Hierarchy */}
+                    <div className="space-y-3">
+                      {/* Tabs */}
+                      {parsedConfig.navigation.tabs && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Tabs:</div>
+                          <div className="space-y-1">
+                            {renderNavigationItems(parsedConfig.navigation.tabs)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Anchors */}
+                      {parsedConfig.navigation.anchors && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Anchors:</div>
+                          <div className="space-y-1">
+                            {renderNavigationItems(parsedConfig.navigation.anchors)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Dropdowns */}
+                      {parsedConfig.navigation.dropdowns && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Dropdowns:</div>
+                          <div className="space-y-1">
+                            {renderNavigationItems(parsedConfig.navigation.dropdowns)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Groups */}
+                      {parsedConfig.navigation.groups && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Groups:</div>
+                          <div className="space-y-1">
+                            {renderNavigationItems(parsedConfig.navigation.groups)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Root Pages */}
+                      {parsedConfig.navigation.pages && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Root Pages:</div>
+                          <div className="space-y-1">
+                            {renderNavigationItems(parsedConfig.navigation.pages)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Version-specific navigation */}
+                      {parsedConfig.navigation.versions && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Version Navigation:</div>
+                          {parsedConfig.navigation.versions.map((version, index) => (
+                            <div key={index} className="mb-2">
+                              <div className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                                📚 Version {version.version}
                               </div>
-                              {tab.menu && (
-                                <div className="mt-1 ml-2 space-y-0.5">
-                                  {tab.menu.map((menuItem, menuIndex) => (
-                                    <div key={menuIndex} className="text-xs text-zinc-950/70 dark:text-white/70">
-                                      📋 {menuItem.item}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              <div className="space-y-1">
+                                {version.pages && renderNavigationItems(version.pages, 1)}
+                                {version.groups && renderNavigationItems(version.groups, 1)}
+                                {version.tabs && renderNavigationItems(version.tabs, 1)}
+                                {version.anchors && renderNavigationItems(version.anchors, 1)}
+                                {version.dropdowns && renderNavigationItems(version.dropdowns, 1)}
+                              </div>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Anchors */}
-                    {parsedConfig.navigation.anchors && (
-                      <div className="mb-3">
-                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Anchors:</div>
-                        <div className="space-y-1">
-                          {parsedConfig.navigation.anchors.map((anchor, index) => (
-                            <div key={index} className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs rounded inline-block mr-1">
-                              {anchor.anchor}
+                      {/* Language-specific navigation */}
+                      {parsedConfig.navigation.languages && (
+                        <div>
+                          <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-2 font-medium">Language Navigation:</div>
+                          {parsedConfig.navigation.languages.map((language, index) => (
+                            <div key={index} className="mb-2">
+                              <div className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">
+                                🌍 {language.language.toUpperCase()}
+                              </div>
+                              <div className="space-y-1">
+                                {language.pages && renderNavigationItems(language.pages, 1)}
+                                {language.groups && renderNavigationItems(language.groups, 1)}
+                                {language.tabs && renderNavigationItems(language.tabs, 1)}
+                                {language.anchors && renderNavigationItems(language.anchors, 1)}
+                                {language.dropdowns && renderNavigationItems(language.dropdowns, 1)}
+                              </div>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
-
-                    {/* Dropdowns */}
-                    {parsedConfig.navigation.dropdowns && (
-                      <div className="mb-3">
-                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Dropdowns:</div>
-                        <div className="space-y-1">
-                          {parsedConfig.navigation.dropdowns.map((dropdown, index) => (
-                            <div key={index} className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded inline-block mr-1">
-                              ▼ {dropdown.dropdown}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Groups */}
-                    {parsedConfig.navigation.groups && (
-                      <div className="mb-3">
-                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Groups:</div>
-                        <div className="space-y-2">
-                          {parsedConfig.navigation.groups.map((group, index) => (
-                            <div key={index} className="border-l-2 border-zinc-200 dark:border-zinc-700 pl-2">
-                              <div className="text-xs font-medium text-zinc-950 dark:text-white">{group.group}</div>
-                              {group.pages && (
-                                <div className="mt-1 space-y-0.5">
-                                  {group.pages.map((page, pageIndex) => (
-                                    <div key={pageIndex} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1">
-                                      <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
-                                      {typeof page === 'string' ? page : page.toString()}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Root Pages */}
-                    {parsedConfig.navigation.pages && (
-                      <div className="mb-3">
-                        <div className="text-xs text-zinc-950/70 dark:text-white/70 mb-1">Root Pages:</div>
-                        <div className="space-y-0.5">
-                          {parsedConfig.navigation.pages.map((page, pageIndex) => (
-                            <div key={pageIndex} className="text-xs text-zinc-950/70 dark:text-white/70 flex items-center gap-1">
-                              <span className="w-1 h-1 bg-zinc-400 rounded-full"></span>
-                              {typeof page === 'string' ? page : page.toString()}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
