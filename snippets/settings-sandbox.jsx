@@ -251,7 +251,11 @@ export const DocsJsonSandbox = () => {
     <div className="p-4 border dark:border-white/10 rounded-2xl not-prose">
       <div className="space-y-6">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-950 dark:text-white mb-2">
+          <h1 className="text-xl font-semibold text-zinc-950 dark:text-white mb-2 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <rect x="4" y="6" width="16" height="16" rx="2" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l-2 2 2 2M15 12l2 2-2 2" stroke="currentColor" strokeWidth="1.8" />
+            </svg>
             Sandbox
           </h1>
           <p className="text-sm text-zinc-950/70 dark:text-white/70">
