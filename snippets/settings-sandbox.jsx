@@ -259,30 +259,45 @@ export const DocsJsonSandbox = () => {
             Sandbox
           </h1>
           <p className="text-sm text-zinc-950/70 dark:text-white/70">
-            Test and validate your <code>docs.json</code> configuration. Edit the JSON and see real-time validation.
+            Test and validate your <code>docs.json</code> configuration.
           </p>
         </div>
 
         {/* Example Buttons */}
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => loadExample('minimal')}
-            className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-300"
-          >
-            Minimal Example
-          </button>
-          <button
-            onClick={() => loadExample('complete')}
-            className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-300"
-          >
-            Complete Example
-          </button>
-          <button
-            onClick={() => loadExample('api')}
-            className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors dark:bg-purple-900/30 dark:text-purple-300"
-          >
-            API Documentation Example
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="text-center">
+            <button
+              onClick={() => loadExample('minimal')}
+              className="w-full px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors dark:bg-blue-900/30 dark:text-blue-300 font-medium"
+            >
+              Minimal example
+            </button>
+            <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
+              Basic configuration with only required fields.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => loadExample('complete')}
+              className="w-full px-3 py-2 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:text-green-300 font-medium"
+            >
+              Complete example
+            </button>
+            <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
+              Full-featured example.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => loadExample('api')}
+              className="w-full px-3 py-2 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors dark:bg-purple-900/30 dark:text-purple-300 font-medium"
+            >
+              API documentation example
+            </button>
+            <p className="text-xs text-zinc-950/60 dark:text-white/60 mt-1">
+              API-focused configuration with OpenAPI integration.
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
