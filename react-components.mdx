@@ -1,20 +1,20 @@
 ---
 title: "React"
-description: "Build interactive and reusable elements with React components"
+description: "Build interactive and reusable elements with React widgets"
 icon: "react"
 ---
 
 import { ColorGenerator } from "/snippets/color-generator.jsx";
 
-[React components](https://react.dev) are a powerful way to create interactive and reusable elements in your documentation.
+[React widgets](https://react.dev) are a powerful way to create interactive and reusable elements in your documentation.
 
-## Using React components
+## Using React widgets
 
-You can build React components directly in your `MDX` files using [React hooks](https://react.dev/reference/react/hooks).
+You can build React widgets directly in your `MDX` files using [React hooks](https://react.dev/reference/react/hooks).
 
 ### Example
 
-This example declares a `Counter` component and then uses it with `<Counter />`.
+This example declares a `Counter` widget and then uses it with `<Counter />`.
 
 ```mdx
 export const Counter = () => {
@@ -86,17 +86,17 @@ export const Counter = () => {
   )
 }
 
-The counter renders as an interactive React component.
+The counter renders as an interactive React widget.
 
 <Counter />
 
-## Importing components
+## Importing widgets
 
-You can import components from your `snippets` folder. Unlike regular React, you cannot import components from every `MDX` file. Reusable components must be referenced from files within the `snippets` folder. Learn more about [reusable snippets](/reusable-snippets).
+You can import widgets from your `snippets` folder. Unlike regular React, you cannot import widgets from every `MDX` file. Reusable widgets must be referenced from files within the `snippets` folder. Learn more about [reusable snippets](/reusable-snippets).
 
 ### Example
 
-This example declares a `ColorGenerator` component that uses multiple React hooks and then uses it in an `MDX` file.
+This example declares a `ColorGenerator` widget that uses multiple React hooks and then uses it in an `MDX` file.
 
 Create `color-generator.jsx` file in the `snippets` folder:
 
@@ -213,7 +213,7 @@ export const ColorGenerator = () => {
 }
 ```
 
-Import the `ColorGenerator` component and use it in an `MDX` file:
+Import the `ColorGenerator` widget and use it in an `MDX` file:
 
 ```mdx
 import { ColorGenerator } from "/snippets/color-generator.jsx"
@@ -221,7 +221,7 @@ import { ColorGenerator } from "/snippets/color-generator.jsx"
 <ColorGenerator />
 ```
 
-The color generator renders as an interactive React component.
+The color generator renders as an interactive React widget.
 
 <ColorGenerator />
 
@@ -229,16 +229,16 @@ The color generator renders as an interactive React component.
 
 <AccordionGroup>
   <Accordion title="Client-side rendering impact">
-    React hook components render on the client-side, which has several implications:
+    React hook widgets render on the client-side, which has several implications:
 
     - **SEO**: Search engines might not fully index dynamic content.
-    - **Initial load**: Visitors may experience a flash of loading content before components render.
+    - **Initial load**: Visitors may experience a flash of loading content before widgets render.
     - **Accessibility**: Ensure dynamic content changes are announced to screen readers.
   </Accordion>
   <Accordion title="Performance best practices">
     - **Optimize dependency arrays**: Include only necessary dependencies in your `useEffect` dependency arrays.
     - **Memoize complex calculations**: Use `useMemo` or `useCallback` for expensive operations.
-    - **Reduce re-renders**: Break large components into smaller ones to prevent cascading re-renders.
-    - **Lazy loading**: Consider lazy loading complex components to improve initial page load time.
+    - **Reduce re-renders**: Break large widgets into smaller ones to prevent cascading re-renders.
+    - **Lazy loading**: Consider lazy loading complex widgets to improve initial page load time.
   </Accordion>
 </AccordionGroup>
