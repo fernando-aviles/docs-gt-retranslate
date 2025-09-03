@@ -4,7 +4,7 @@ description: "Post product updates in your docs with a subscribable RSS feed"
 icon: "newspaper"
 ---
 
-Create a changelog for your docs by adding [Update components](/components/update) to a page.
+Create a changelog for your docs by adding [Update widgets](/widgets/update) to a page.
 
 Check out the [Mintlify changelog](/changelog) as an example: you can include links, images, text, and demos of your new features in each update.
 
@@ -15,7 +15,7 @@ Check out the [Mintlify changelog](/changelog) as an example: you can include li
     1. Create a new page in your docs such as `changelog.mdx` or `updates.mdx`.
     2. Add your changelog page to your navigation scheme in your `docs.json`.
   </Step>
-  <Step title="Add Update components to your changelog">
+  <Step title="Add Update widgets to your changelog">
     Add an `Update` for each changelog entry.
 
     Include relevant information like feature releases, bug fixes, or other announcements.
@@ -61,7 +61,7 @@ Each `label` property for an `Update` automatically creates an entry in the righ
 
 ### Tag filters
 
-Add `tags` to your `Update` components to replace the table of contents with tag filters. Users can filter the changelog by selecting one or more tags:
+Add `tags` to your `Update` widgets to replace the table of contents with tag filters. Users can filter the changelog by selecting one or more tags:
 
 ```mdx Tag filters example wrap
 <Update label="March 2025" description="v0.0.10" tags={["Wintergreen", "Spearmint"]}>
@@ -100,11 +100,11 @@ Add `tags` to your `Update` components to replace the table of contents with tag
 
 ### Subscribable changelogs
 
-Using `Update` components creates a subscribable RSS feed at your page URL with `/rss.xml` appended. For example, `mintlify.com/docs/changelog/rss.xml`.
+Using `Update` widgets creates a subscribable RSS feed at your page URL with `/rss.xml` appended. For example, `mintlify.com/docs/changelog/rss.xml`.
 
-Entries are added to the RSS feed when new `Update` components are published and when new headings are added inside of existing `<Update>` tags.
+Entries are added to the RSS feed when new `Update` widgets are published and when new headings are added inside of existing `<Update>` tags.
 
-The top level headings of `Update` components are used as the titles of RSS feed entries, and the entries link to their heading anchors in your docs.
+The top level headings of `Update` widgets are used as the titles of RSS feed entries, and the entries link to their heading anchors in your docs.
 
 ```xml Example RSS feed
 <?xml version="1.0" encoding="UTF-8"?>
