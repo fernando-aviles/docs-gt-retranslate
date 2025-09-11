@@ -1,0 +1,143 @@
+---
+title: "AI ads"
+description: "Monetize your documentation with AI-powered advertising"
+icon: "rectangle-ad"
+---
+
+AI ads allow you to monetize your documentation by displaying contextually relevant advertisements powered by artificial intelligence. These ads are designed to be non-intrusive while providing value to your users through relevant product recommendations and services.
+
+## How AI ads work
+
+AI ads analyze your documentation content and user behavior to display targeted advertisements that align with your audience's interests. The system uses machine learning to optimize ad placement and relevance, ensuring a better user experience while maximizing revenue potential.
+
+Key features:
+- **Contextual targeting** - Ads match your content topics and user intent
+- **Non-intrusive placement** - Ads integrate seamlessly with your documentation design
+- **Performance optimization** - AI continuously improves ad relevance and click-through rates
+- **Revenue tracking** - Detailed analytics on ad performance and earnings
+
+## Enabling AI ads
+
+To enable AI ads on your documentation site, add the `aiAds` configuration to your `docs.json` file:
+
+```json
+{
+  "aiAds": {
+    "enabled": true,
+    "placement": ["sidebar", "content"],
+    "targeting": {
+      "categories": ["developer-tools", "api", "documentation"],
+      "keywords": ["API", "integration", "development"]
+    }
+  }
+}
+```
+
+## Configuration options
+
+<ResponseField name="enabled" type="boolean" required>
+  Enable or disable AI ads on your documentation site.
+</ResponseField>
+
+<ResponseField name="placement" type="array" required>
+  Specify where ads should appear. Options include:
+  - `sidebar` - Display ads in the sidebar
+  - `content` - Display ads within content sections
+  - `header` - Display ads in the header area
+  - `footer` - Display ads in the footer
+</ResponseField>
+
+<ResponseField name="targeting" type="object">
+  Configure ad targeting parameters.
+  
+  <Expandable title="targeting options">
+    <ResponseField name="categories" type="array">
+      Content categories for ad targeting (e.g., "developer-tools", "api", "saas").
+    </ResponseField>
+
+    <ResponseField name="keywords" type="array">
+      Keywords to help target relevant ads.
+    </ResponseField>
+
+    <ResponseField name="exclude" type="array">
+      Ad categories to exclude from your site.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="frequency" type="object">
+  Control ad frequency and density.
+  
+  <Expandable title="frequency options">
+    <ResponseField name="maxPerPage" type="number">
+      Maximum number of ads per page (default: 3).
+    </ResponseField>
+
+    <ResponseField name="minContentLength" type="number">
+      Minimum content length before showing ads (default: 500 characters).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Ad placement best practices
+
+### Sidebar placement
+Sidebar ads work well for documentation sites with consistent navigation. They remain visible as users scroll through content without interrupting the reading experience.
+
+```json
+{
+  "aiAds": {
+    "enabled": true,
+    "placement": ["sidebar"],
+    "targeting": {
+      "categories": ["developer-tools"]
+    }
+  }
+}
+```
+
+### Content placement
+In-content ads can be more effective but should be used sparingly to avoid disrupting the user experience. AI automatically selects optimal placement points within your content.
+
+```json
+{
+  "aiAds": {
+    "enabled": true,
+    "placement": ["content"],
+    "frequency": {
+      "maxPerPage": 2,
+      "minContentLength": 1000
+    }
+  }
+}
+```
+
+## Revenue and analytics
+
+AI ads provide detailed analytics to help you understand performance and optimize revenue:
+
+- **Impressions** - Number of times ads are displayed
+- **Click-through rate (CTR)** - Percentage of users who click on ads
+- **Revenue per page** - Earnings breakdown by documentation page
+- **Top-performing content** - Pages that generate the most ad revenue
+
+Access your ad analytics through the Mintlify dashboard under the "Monetization" section.
+
+## Privacy and compliance
+
+AI ads are designed with privacy in mind:
+
+- **GDPR compliant** - Respects user privacy preferences and consent
+- **No personal data collection** - Targeting based on content, not user tracking
+- **Transparent disclosure** - Ads are clearly labeled as sponsored content
+- **User control** - Users can opt out of personalized ads
+
+## Getting started
+
+1. **Enable AI ads** in your `docs.json` configuration
+2. **Set targeting preferences** based on your content and audience
+3. **Choose ad placements** that work best for your documentation layout
+4. **Monitor performance** through the analytics dashboard
+5. **Optimize settings** based on user feedback and revenue data
+
+AI ads typically take 24-48 hours to begin displaying after configuration. The AI system needs time to analyze your content and establish targeting parameters for optimal ad relevance.
