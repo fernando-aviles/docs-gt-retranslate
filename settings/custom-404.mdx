@@ -1,0 +1,114 @@
+---
+title: "Custom 404 pages"
+description: "Create personalized 404 error pages with custom titles and descriptions"
+icon: "triangle-exclamation"
+---
+
+Use custom 404 pages to provide a better user experience when visitors encounter broken or missing links. Instead of showing a generic "Page not found" message, you can display helpful information with your own branding and messaging.
+
+## Configuration
+
+Configure your custom 404 page in the `errors.404` section of your `docs.json` file:
+
+```json
+{
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "I can't be found",
+      "description": "What ever **happened** to this _page_?"
+    }
+  }
+}
+```
+
+### Parameters
+
+<ResponseField name="redirect" type="boolean">
+  Whether to automatically redirect to the home page when a page is not found. Set to `false` to show the custom 404 page instead.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Custom title for the 404 error page. This replaces the default "Page not found" heading.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Custom description for the 404 error page. Supports Markdown formatting for styling text with **bold**, _italic_, and [links](/).
+</ResponseField>
+
+## Examples
+
+### Basic custom 404
+
+```json
+{
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Oops! Page not found",
+      "description": "The page you're looking for doesn't exist."
+    }
+  }
+}
+```
+
+### Branded 404 with helpful links
+
+```json
+{
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Lost in space?",
+      "description": "This page has wandered off. Try our [documentation](/docs) or [contact support](/support) for help."
+    }
+  }
+}
+```
+
+### Playful 404 with formatting
+
+```json
+{
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "404: Page went on vacation",
+      "description": "This page is **temporarily unavailable**. While you wait, check out our _latest features_ or return to the [homepage](/)."
+    }
+  }
+}
+```
+
+### Auto-redirect (no custom page)
+
+```json
+{
+  "errors": {
+    "404": {
+      "redirect": true
+    }
+  }
+}
+```
+
+## Best practices
+
+- **Keep titles concise** - Aim for 2-8 words that clearly communicate the error
+- **Provide helpful next steps** - Include links to your homepage, documentation, or support
+- **Match your brand voice** - Use language that fits your product's personality
+- **Use Markdown sparingly** - Bold and italic text can help emphasize key information
+- **Test your links** - Ensure any links in your description work correctly
+
+## Markdown support
+
+The `description` field supports standard Markdown formatting:
+
+- **Bold text** with `**bold**`
+- _Italic text_ with `_italic_`
+- [Links](/path) with `[text](/path)`
+- `Inline code` with backticks
+
+<Note>
+  Complex Markdown features like headers, lists, and code blocks are not supported in 404 descriptions.
+</Note>
