@@ -46,7 +46,8 @@
               "pages",
               "navigation",
               "themes",
-              "settings/custom-domain"
+              "settings/custom-domain",
+              "settings/custom-404"
             ]
           },
           {
