@@ -65,33 +65,6 @@
             ]
           },
           {
-            "group": "Components",
-            "pages": [
-              "text",
-              "image-embeds",
-              "list-table",
-              "code",
-              "reusable-snippets",
-              "components/accordions",
-              "components/callouts",
-              "components/cards",
-              "components/columns",
-              "components/code-groups",
-              "components/examples",
-              "components/expandables",
-              "components/fields",
-              "components/frames",
-              "components/icons",
-              "components/mermaid-diagrams",
-              "components/panel",
-              "components/steps",
-              "components/tabs",
-              "components/tooltips",
-              "components/update",
-              "components/banner"
-            ]
-          },
-          {
             "group": "API pages",
             "pages": [
               "api-playground/overview",
@@ -233,6 +206,40 @@
         ]
       },
       {
+        "tab": "Components",
+        "icon": "blocks",
+        "description": "UI components and content elements",
+        "groups": [
+          {
+            "group": "Components",
+            "pages": [
+              "text",
+              "image-embeds",
+              "list-table",
+              "code",
+              "reusable-snippets",
+              "components/accordions",
+              "components/callouts",
+              "components/cards",
+              "components/columns",
+              "components/code-groups",
+              "components/examples",
+              "components/expandables",
+              "components/fields",
+              "components/frames",
+              "components/icons",
+              "components/mermaid-diagrams",
+              "components/panel",
+              "components/steps",
+              "components/tabs",
+              "components/tooltips",
+              "components/update",
+              "components/banner"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
         "description": "Reference for the API",
         "icon": "terminal",
@@ -261,7 +268,7 @@
       },
       {
         "tab": "Guides",
-        "icon": "book-open",
+        "icon": "graduation-cap",
         "description": "Step-by-step guides and tutorials",
         "groups": [
           {
