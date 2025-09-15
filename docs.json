@@ -208,34 +208,94 @@
       {
         "tab": "Components",
         "icon": "blocks",
-        "description": "UI components and content elements",
-        "groups": [
+        "menu": [
           {
-            "group": "Components",
-            "pages": [
-              "text",
-              "image-embeds",
-              "list-table",
-              "code",
-              "reusable-snippets",
-              "components/accordions",
-              "components/callouts",
-              "components/cards",
-              "components/columns",
-              "components/code-groups",
-              "components/examples",
-              "components/expandables",
-              "components/fields",
-              "components/frames",
-              "components/icons",
-              "components/mermaid-diagrams",
-              "components/panel",
-              "components/steps",
-              "components/tabs",
-              "components/tooltips",
-              "components/update",
-              "components/banner"
-            ]
+            "item": "Accordions",
+            "pages": ["components/accordions"]
+          },
+          {
+            "item": "Banner",
+            "pages": ["components/banner"]
+          },
+          {
+            "item": "Callouts",
+            "pages": ["components/callouts"]
+          },
+          {
+            "item": "Cards",
+            "pages": ["components/cards"]
+          },
+          {
+            "item": "Code",
+            "pages": ["code"]
+          },
+          {
+            "item": "Code groups",
+            "pages": ["components/code-groups"]
+          },
+          {
+            "item": "Columns",
+            "pages": ["components/columns"]
+          },
+          {
+            "item": "Examples",
+            "pages": ["components/examples"]
+          },
+          {
+            "item": "Expandables",
+            "pages": ["components/expandables"]
+          },
+          {
+            "item": "Fields",
+            "pages": ["components/fields"]
+          },
+          {
+            "item": "Frames",
+            "pages": ["components/frames"]
+          },
+          {
+            "item": "Icons",
+            "pages": ["components/icons"]
+          },
+          {
+            "item": "Image embeds",
+            "pages": ["image-embeds"]
+          },
+          {
+            "item": "List table",
+            "pages": ["list-table"]
+          },
+          {
+            "item": "Mermaid diagrams",
+            "pages": ["components/mermaid-diagrams"]
+          },
+          {
+            "item": "Panel",
+            "pages": ["components/panel"]
+          },
+          {
+            "item": "Reusable snippets",
+            "pages": ["reusable-snippets"]
+          },
+          {
+            "item": "Steps",
+            "pages": ["components/steps"]
+          },
+          {
+            "item": "Tabs",
+            "pages": ["components/tabs"]
+          },
+          {
+            "item": "Text",
+            "pages": ["text"]
+          },
+          {
+            "item": "Tooltips",
+            "pages": ["components/tooltips"]
+          },
+          {
+            "item": "Update",
+            "pages": ["components/update"]
           }
         ]
       },
