@@ -260,6 +260,17 @@
         ]
       },
       {
+        "tab": "Guides",
+        "icon": "book-open",
+        "description": "Step-by-step guides and tutorials",
+        "groups": [
+          {
+            "group": "Guides",
+            "pages": []
+          }
+        ]
+      },
+      {
         "tab": "Changelog",
         "icon": "history",
         "description": "Updates and changes",
