@@ -16,7 +16,6 @@
       {
         "tab": "Documentation",
         "icon": "book",
-        "description": "Set up your documentation",
         "groups": [
           {
             "group": "Getting started",
@@ -69,7 +68,6 @@
             "pages": [
               "api-playground/overview",
               "api-playground/openapi-setup",
-              "api-playground/migrating-from-mdx",
               {
                 "group": "Customization",
                 "icon": "wrench",
@@ -300,8 +298,19 @@
         ]
       },
       {
+        "tab": "Guides",
+        "icon": "compass",
+        "groups": [
+          {
+            "group": "Guides",
+            "pages": [
+              "api-playground/migrating-from-mdx"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API Reference",
-        "description": "Reference for the API",
         "icon": "terminal",
         "groups": [
           {
@@ -327,20 +336,8 @@
         ]
       },
       {
-        "tab": "Guides",
-        "icon": "graduation-cap",
-        "description": "Step-by-step guides and tutorials",
-        "groups": [
-          {
-            "group": "Guides",
-            "pages": []
-          }
-        ]
-      },
-      {
         "tab": "Changelog",
         "icon": "history",
-        "description": "Updates and changes",
         "groups": [
           {
             "group": "Changelog",
