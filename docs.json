@@ -12,9 +12,9 @@
     "library": "lucide"
   },
   "navigation": {
-    "dropdowns": [
+    "tabs": [
       {
-        "dropdown": "Documentation",
+        "tab": "Documentation",
         "icon": "book",
         "description": "Set up your documentation",
         "groups": [
@@ -233,7 +233,7 @@
         ]
       },
       {
-        "dropdown": "API Reference",
+        "tab": "API Reference",
         "description": "Reference for the API",
         "icon": "terminal",
         "groups": [
@@ -260,7 +260,7 @@
         ]
       },
       {
-        "dropdown": "Changelog",
+        "tab": "Changelog",
         "icon": "history",
         "description": "Updates and changes",
         "groups": [
